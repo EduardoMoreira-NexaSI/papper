@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos | Papper</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+    <aside class="menu-lateral">
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper — Painel Gerencial Pastoral"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html">Frequência</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html" class="ativo">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">Sair</button>
+    </aside>
+
+    <main class="conteudo-dashboard">
+        <header class="cabecalho-dashboard">
+            <div>
+                <p class="saudacao">Equipes e ministérios</p>
+                <h1>Grupos</h1>
+            </div>
+
+            <div class="usuario-logado">
+                <div class="usuario-avatar" id="usuario-avatar">U</div>
+                <div>
+                    <strong id="usuario-nome">Carregando...</strong>
+                    <span id="usuario-perfil"></span>
+                </div>
+            </div>
+        </header>
+
+        <section class="resumo-grupos" aria-label="Resumo dos grupos">
+            <article class="cartao-resumo-grupo">
+                <span>Grupos ativos</span>
+                <strong id="total-grupos-ativos">—</strong>
+                <small>Ministérios e equipes em atividade</small>
+            </article>
+
+            <article class="cartao-resumo-grupo">
+                <span>Total de integrantes</span>
+                <strong id="total-integrantes">—</strong>
+                <small>Membros vinculados aos grupos</small>
+            </article>
+
+            <article class="cartao-resumo-grupo destaque">
+                <span>Grupos sem líder</span>
+                <strong id="total-grupos-sem-lider">—</strong>
+                <small>Precisam de um responsável</small>
+            </article>
+        </section>
+
+        <section class="barra-acoes barra-acoes-grupos">
+            <div class="campo-pesquisa">
+                <label for="pesquisa-grupo">Pesquisar grupo</label>
+                <input
+                    type="search"
+                    id="pesquisa-grupo"
+                    placeholder="Digite o nome do grupo"
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label for="filtro-status-grupo">Situação</label>
+                <select id="filtro-status-grupo">
+                    <option value="ativos">Ativos</option>
+                    <option value="inativos">Inativos</option>
+                    <option value="todos">Todos</option>
+                </select>
+            </div>
+
+            <button type="button" id="botao-novo-grupo">
+                + Novo grupo
+            </button>
+        </section>
+
+        <section id="formulario-grupo-container" class="formulario-painel oculto">
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Organização</span>
+                    <h2 id="titulo-formulario-grupo">Novo grupo</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-formulario-grupo"
+                    aria-label="Fechar formulário"
+                >×</button>
+            </div>
+
+            <form id="form-grupo">
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="grupo-nome">Nome do grupo</label>
+                        <input
+                            type="text"
+                            id="grupo-nome"
+                            minlength="2"
+                            maxlength="100"
+                            placeholder="Ex.: Grupo de Louvor"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="grupo-lider">Líder</label>
+                        <select id="grupo-lider">
+                            <option value="">Sem líder definido</option>
+                        </select>
+                    </div>
+
+                    <div class="campo campo-largura-total">
+                        <label for="grupo-descricao">Descrição</label>
+                        <textarea
+                            id="grupo-descricao"
+                            maxlength="250"
+                            rows="3"
+                            placeholder="Descreva a responsabilidade deste grupo"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="acoes-formulario">
+                    <button type="button" id="botao-cancelar-grupo">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="botao-salvar-grupo">
+                        Salvar grupo
+                    </button>
+                </div>
+
+                <p id="mensagem-formulario-grupo"></p>
+            </form>
+        </section>
+
+        <section class="painel-listagem-grupos">
+            <div class="tabela-cabecalho">
+                <div>
+                    <h2>Grupos da igreja</h2>
+                    <p id="quantidade-grupos">Carregando...</p>
+                </div>
+            </div>
+
+            <div id="lista-grupos" class="grade-grupos">
+                <p class="estado-listagem">Carregando grupos...</p>
+            </div>
+        </section>
+
+        <section id="detalhes-grupo-container" class="formulario-painel painel-detalhes-grupo oculto">
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Integrantes</span>
+                    <h2 id="detalhes-grupo-nome">Detalhes do grupo</h2>
+                    <p id="detalhes-grupo-descricao"></p>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-detalhes-grupo"
+                    aria-label="Fechar detalhes"
+                >×</button>
+            </div>
+
+            <div class="gestao-lider-grupo">
+                <div>
+                    <span>Líder atual</span>
+                    <strong id="detalhes-grupo-lider">Não definido</strong>
+                </div>
+
+                <div class="controle-lider-grupo">
+                    <select id="selecionar-lider-grupo">
+                        <option value="">Escolha um membro</option>
+                    </select>
+                    <button type="button" id="botao-definir-lider">
+                        Definir líder
+                    </button>
+                    <button type="button" id="botao-remover-lider">
+                        Remover liderança
+                    </button>
+                </div>
+            </div>
+
+            <div class="adicionar-integrante-grupo">
+                <div class="campo">
+                    <label for="selecionar-membro-grupo">Adicionar integrante</label>
+                    <select id="selecionar-membro-grupo">
+                        <option value="">Selecione um membro</option>
+                    </select>
+                </div>
+
+                <button type="button" id="botao-adicionar-membro-grupo">
+                    Adicionar ao grupo
+                </button>
+            </div>
+
+            <div class="tabela-responsiva">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Situação</th>
+                            <th>Participação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela-integrantes">
+                        <tr>
+                            <td colspan="4">Selecione um grupo.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="mensagem-detalhes-grupo"></p>
+        </section>
+
+        <p id="mensagem-pagina-grupos"></p>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/grupos.js"></script>
+</body>
+</html>

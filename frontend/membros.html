@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Membros | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+    <aside class="menu-lateral">
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper — Painel Gerencial Pastoral"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html" class="ativo">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html">Frequência</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+    </aside>
+
+    <main class="conteudo-dashboard">
+        <header class="cabecalho-dashboard">
+            <div>
+                <p class="saudacao">Gestão de pessoas</p>
+                <h1>Membros</h1>
+            </div>
+
+            <div class="usuario-logado">
+                <div class="usuario-avatar" id="usuario-avatar">
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Barra de pesquisa e filtros -->
+
+        <section class="barra-acoes">
+            <div class="campo-pesquisa">
+                <label for="pesquisa-membro">
+                    Pesquisar membro
+                </label>
+
+                <input
+                    type="search"
+                    id="pesquisa-membro"
+                    placeholder="Digite o nome ou CPF"
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label for="filtro-status">
+                    Situação
+                </label>
+
+                <select id="filtro-status">
+                    <option value="todos">Todos</option>
+                    <option value="ativos">Ativos</option>
+                    <option value="inativos">Inativos</option>
+                </select>
+            </div>
+
+            <button type="button" id="botao-novo-membro">
+                + Novo membro
+            </button>
+        </section>
+
+        <!-- Formulário de cadastro -->
+
+        <section
+            id="formulario-membro-container"
+            class="formulario-painel oculto"
+        >
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Cadastro</span>
+                    <h2 id="titulo-formulario-membro">Novo membro</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-formulario"
+                    aria-label="Fechar formulário"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="form-membro">
+                <h3 class="subtitulo-formulario">
+                    Informações pessoais
+                </h3>
+
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="membro-nome">
+                            Nome completo
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-nome"
+                            minlength="3"
+                            maxlength="150"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-cpf">
+                            CPF
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-cpf"
+                            minlength="11"
+                            maxlength="11"
+                            placeholder="Somente números"
+                            inputmode="numeric"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-nascimento">
+                            Data de nascimento
+                        </label>
+
+                        <input
+                            type="date"
+                            id="membro-nascimento"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-contato">
+                            Contato
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-contato"
+                            minlength="9"
+                            maxlength="20"
+                            placeholder="Telefone ou WhatsApp"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <h3 class="subtitulo-formulario">
+                    Endereço
+                </h3>
+
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="membro-cep">
+                            CEP
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-cep"
+                            minlength="8"
+                            maxlength="8"
+                            inputmode="numeric"
+                            placeholder="Somente números"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-logradouro">
+                            Logradouro
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-logradouro"
+                            maxlength="180"
+                            placeholder="Rua, avenida ou travessa"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-numero">
+                            Número
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-numero"
+                            maxlength="20"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-complemento">
+                            Complemento
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-complemento"
+                            maxlength="100"
+                            placeholder="Casa, apartamento, bloco..."
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-bairro">
+                            Bairro
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-bairro"
+                            maxlength="100"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-cidade">
+                            Cidade
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-cidade"
+                            maxlength="100"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-estado">
+                            Estado
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-estado"
+                            minlength="2"
+                            maxlength="2"
+                            placeholder="RJ"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membro-referencia">
+                            Ponto de referência
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membro-referencia"
+                            maxlength="200"
+                        >
+                    </div>
+                </div>
+
+                <div class="acoes-formulario">
+                    <button
+                        type="button"
+                        id="botao-cancelar"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="botao-salvar-membro"
+                    >
+                        Salvar membro
+                    </button>
+                </div>
+
+                <p id="mensagem-formulario"></p>
+            </form>
+        </section>
+
+        <!-- Tabela de membros -->
+
+        <section class="tabela-container">
+            <div class="tabela-cabecalho">
+                <div>
+                    <h2>Lista de membros</h2>
+
+                    <p id="quantidade-membros">
+                        Carregando...
+                    </p>
+                </div>
+            </div>
+
+            <div class="tabela-responsiva">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Nascimento</th>
+                            <th>Contato</th>
+                            <th>Cargo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="corpo-tabela-membros">
+                        <tr>
+                            <td colspan="7">
+                                Carregando membros...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <p id="mensagem-pagina"></p>
+    </main>
+
+    <!-- Janela da ficha do membro -->
+
+    <div id="modal-ficha" class="modal-overlay oculto">
+        <section
+            class="modal-ficha"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-ficha"
+        >
+            <header class="modal-cabecalho">
+                <div>
+                    <p class="saudacao">Ficha cadastral</p>
+                    <h2 id="titulo-ficha">Dados do membro</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-ficha"
+                    aria-label="Fechar ficha"
+                >
+                    ×
+                </button>
+            </header>
+
+            <div class="ficha-identificacao">
+                <div class="ficha-avatar" id="ficha-avatar">
+                    M
+                </div>
+
+                <div>
+                    <h3 id="ficha-nome">
+                        Carregando...
+                    </h3>
+
+                    <span id="ficha-status"></span>
+                </div>
+            </div>
+
+            <div class="ficha-secao">
+                <h3>Informações pessoais</h3>
+
+                <div class="ficha-grade">
+                    <div class="ficha-campo">
+                        <span>CPF</span>
+                        <strong id="ficha-cpf">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Data de nascimento</span>
+                        <strong id="ficha-nascimento">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Contato</span>
+                        <strong id="ficha-contato">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Cargo</span>
+                        <strong id="ficha-cargo">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ficha-secao">
+                <h3>Endereço</h3>
+
+                <div class="ficha-grade">
+                    <div class="ficha-campo">
+                        <span>CEP</span>
+                        <strong id="ficha-cep">—</strong>
+                    </div>
+
+                    <div class="ficha-campo ficha-campo-maior">
+                        <span>Logradouro e número</span>
+                        <strong id="ficha-logradouro">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Bairro</span>
+                        <strong id="ficha-bairro">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Cidade e estado</span>
+                        <strong id="ficha-cidade">—</strong>
+                    </div>
+
+                    <div class="ficha-campo ficha-campo-maior">
+                        <span>Complemento</span>
+                        <strong id="ficha-complemento">—</strong>
+                    </div>
+
+                    <div class="ficha-campo ficha-campo-maior">
+                        <span>Ponto de referência</span>
+                        <strong id="ficha-referencia">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="modal-rodape">
+                <button
+                    type="button"
+                    id="botao-alterar-status"
+                    class="botao-status-ficha"
+                >
+                    Alterar status
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-editar-ficha"
+                    class="botao-editar-ficha"
+                >
+                    Editar ficha
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-fechar-ficha-rodape"
+                >
+                    Fechar
+                </button>
+            </footer>
+        </section>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/membros.js"></script>
+</body>
+</html>

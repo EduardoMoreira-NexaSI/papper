@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração | Papper</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="pagina-admin">
+  <aside class="menu-lateral">
+    <img src="assets/02_logo_papper_transparente.png" alt="Papper" class="logo-menu">
+
+    <nav class="menu-navegacao">
+      <a href="admin.html" class="ativo">Administração</a>
+      <a href="dashboard.html">Painel da igreja</a>
+      <a href="relatorios.html">Relatórios</a>
+    </nav>
+
+    <button type="button" id="botao-sair">Sair</button>
+  </aside>
+
+  <main class="conteudo-dashboard admin-conteudo">
+    <header class="cabecalho-dashboard">
+      <div>
+        <p class="saudacao">Papper · Área restrita</p>
+        <h1>Manutenção e administração</h1>
+      </div>
+
+      <div class="usuario-logado">
+        <div class="usuario-avatar" id="usuario-avatar">A</div>
+        <div>
+          <strong id="usuario-nome">Carregando...</strong>
+          <span id="usuario-perfil"></span>
+        </div>
+      </div>
+    </header>
+
+    <p id="mensagem-admin" class="mensagem-login"></p>
+
+    <section class="cards-resumo admin-cards">
+      <article class="card-resumo"><span>Igrejas</span><strong id="admin-total-igrejas">—</strong><small>Cadastradas</small></article>
+      <article class="card-resumo"><span>Usuários</span><strong id="admin-total-usuarios">—</strong><small id="admin-usuarios-ativos">— ativos</small></article>
+      <article class="card-resumo"><span>Membros</span><strong id="admin-total-membros">—</strong><small>Em todas as igrejas</small></article>
+      <article class="card-resumo destaque"><span>Banco</span><strong id="admin-banco">—</strong><small>Conexão atual</small></article>
+    </section>
+
+    <section class="admin-grade">
+      <article class="admin-painel">
+        <div class="admin-painel-cabecalho">
+          <div>
+            <span class="etiqueta">Igrejas</span>
+            <h2>Ambientes cadastrados</h2>
+          </div>
+        </div>
+
+        <div class="tabela-responsiva">
+          <table class="admin-tabela">
+            <thead>
+              <tr><th>ID</th><th>Igreja</th><th>Presidente</th><th>Ação</th></tr>
+            </thead>
+            <tbody id="admin-corpo-igrejas"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="admin-painel">
+        <span class="etiqueta">Nova igreja</span>
+        <h2>Cadastrar ambiente</h2>
+        <form id="form-admin-igreja" class="admin-formulario">
+          <div class="campo"><label for="admin-igreja-nome">Nome</label><input id="admin-igreja-nome" required minlength="3"></div>
+          <div class="campo"><label for="admin-igreja-presidente">Presidente</label><input id="admin-igreja-presidente" required minlength="3"></div>
+          <div class="campo"><label for="admin-igreja-endereco">Endereço</label><input id="admin-igreja-endereco" required minlength="3"></div>
+          <button type="submit">Cadastrar igreja</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="admin-painel admin-usuarios-painel">
+      <div class="admin-painel-cabecalho">
+        <div>
+          <span class="etiqueta">Usuários</span>
+          <h2>Contas e acessos</h2>
+        </div>
+        <select id="admin-filtro-igreja" aria-label="Filtrar usuários por igreja">
+          <option value="">Todas as igrejas</option>
+        </select>
+      </div>
+
+      <div class="tabela-responsiva">
+        <table class="admin-tabela">
+          <thead>
+            <tr>
+              <th>Usuário</th><th>Nome</th><th>Perfil</th><th>Igreja</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="admin-corpo-usuarios"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-painel">
+      <span class="etiqueta">Nova conta</span>
+      <h2>Criar usuário</h2>
+      <form id="form-admin-usuario" class="admin-formulario admin-formulario-grid">
+        <div class="campo"><label for="admin-usuario-nome">Nome</label><input id="admin-usuario-nome" required minlength="3"></div>
+        <div class="campo"><label for="admin-usuario-username">Usuário</label><input id="admin-usuario-username" required minlength="3"></div>
+        <div class="campo"><label for="admin-usuario-email">E-mail</label><input id="admin-usuario-email" type="email"></div>
+        <div class="campo"><label for="admin-usuario-senha">Senha inicial</label><input id="admin-usuario-senha" type="password" required minlength="8"></div>
+        <div class="campo">
+          <label for="admin-usuario-perfil">Perfil</label>
+          <select id="admin-usuario-perfil" required>
+            <option value="administrador">Administrador</option>
+            <option value="pastor">Pastor</option>
+            <option value="secretaria">Secretaria</option>
+            <option value="tesoureiro">Tesoureiro</option>
+            <option value="lider">Líder</option>
+            <option value="membro">Membro</option>
+          </select>
+        </div>
+        <div class="campo"><label for="admin-usuario-igreja">Igreja</label><select id="admin-usuario-igreja" required></select></div>
+        <div class="admin-form-acoes"><button type="submit">Criar usuário</button></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

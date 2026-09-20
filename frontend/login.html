@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Painel Gerencial Pastoral</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-login">
+  <main class = "login-container">
+    <section class="login-apresentacao">
+      <div class="logo-container">
+        <img 
+        src="assets/02_logo_papper_transparente.png"
+        alt="Papper - Painel Gerencial Pastoral"
+        class="logo-login"
+        >
+      </div>
+      <h1>Gestão completa para sua igreja</h1>
+
+      <p>
+        Membros, Atividades, Frequência e Financeiro
+        Reunidos em um único painel.
+      </p>
+    </section>
+
+    <section class="login-card">
+      <div class="login-cabecalho">
+        <h2>Entrar</h2>
+        <p>Acesse o painel da sua igreja.</p>
+      </div>
+
+      <form id="form-login">
+        <div class="campo">
+          <label for="credencial">Usuário ou e-mail</label>
+
+          <input
+            type="text"
+            id="credencial"
+            name="credencial"
+            placeholder="user01 ou seuemail@exemplo.com"
+            autocomplete="username"
+            required
+            >
+        </div>
+        
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input
+            type="password"
+            id="senha"
+            placeholder="Digite sua senha"
+            required>
+        </div>
+
+        <button type="submit" id="botao-entrar">
+          Entrar no painel
+        </button>
+
+        <p id="mensagem-login" class="mensagem-login"></p>
+      </form>
+    </section>
+  </main>
+  
+  <script src="js/api.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

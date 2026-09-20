@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Atividades | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+    <!-- Menu lateral -->
+
+    <aside class="menu-lateral">
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper — Painel Gerencial Pastoral"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html" class="ativo">Atividades</a>
+            
+            <a href="frequencia.html">Frequência</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+    </aside>
+
+    <!-- Conteúdo principal -->
+
+    <main class="conteudo-dashboard">
+        <header class="cabecalho-dashboard">
+            <div>
+                <p class="saudacao">
+                    Agenda da igreja
+                </p>
+
+                <h1>Atividades</h1>
+            </div>
+
+            <div class="usuario-logado">
+                <div
+                    class="usuario-avatar"
+                    id="usuario-avatar"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pesquisa e filtros -->
+
+        <section class="barra-acoes barra-atividades">
+            <div class="campo-pesquisa">
+                <label for="pesquisa-atividade">
+                    Pesquisar atividade
+                </label>
+
+                <input
+                    type="search"
+                    id="pesquisa-atividade"
+                    placeholder="Digite o título, tipo ou local"
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label for="filtro-tipo-atividade">
+                    Tipo
+                </label>
+
+                <select id="filtro-tipo-atividade">
+                    <option value="todos">Todos</option>
+                    <option value="culto">Culto</option>
+                    <option value="reuniao">Reunião</option>
+                    <option value="evento">Evento</option>
+                    <option value="ensaio">Ensaio</option>
+                    <option value="estudo">Estudo bíblico</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="campo-filtro">
+                <label for="filtro-status-atividade">
+                    Status
+                </label>
+
+                <select id="filtro-status-atividade">
+                    <option value="todos">Todos</option>
+                    <option value="agendado">Agendados</option>
+                    <option value="realizado">Realizados</option>
+                    <option value="cancelado">Cancelados</option>
+                </select>
+            </div>
+
+            <button
+                type="button"
+                id="botbotao-button"
+                hidden
+            ></button>
+
+            <button
+                type="button"
+                id="botao-nova-atividade"
+            >
+                + Nova atividade
+            </button>
+        </section>
+
+        <!-- Formulário da atividade -->
+
+        <section
+            id="formulario-atividade-container"
+            class="formulario-painel oculto"
+        >
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Agenda</span>
+
+                    <h2 id="titulo-formulario-atividade">
+                        Nova atividade
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fe-button"
+                    hidden
+                ></button>
+
+                <button
+                    type="button"
+                    id="botao-fechar--button"
+                    hidden
+                ></button>
+
+                <button
+                    type="button"
+                    id="botao-fechar-formulario-atividade"
+                    aria-label="Fechar formulário"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="form-atividade">
+                <h3 class="subtitulo-formulario">
+                    Informações da atividade
+                </h3>
+
+                <div class="grade-formulario">
+                    <div class="campo campo-formulario-maior">
+                        <label for="atividade-titulo">
+                            Título
+                        </label>
+
+                        <input
+                            type="text"
+                            id="atividade-titulo"
+                            minlength="3"
+                            maxlength="150"
+                            placeholder="Ex.: Culto de celebração"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="atividade-tipo">
+                            Tipo
+                        </label>
+
+                        <select id="atividade-tipo" required>
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="culto">Culto</option>
+                            <option value="reuniao">Reunião</option>
+                            <option value="evento">Evento</option>
+                            <option value="ensaio">Ensaio</option>
+
+                            <option value="estudo">
+                                Estudo bíblico
+                            </option>
+
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="atividade-local">
+                            Local
+                        </label>
+
+                        <input
+                            type="text"
+                            id="atividade-local"
+                            maxlength="150"
+                            placeholder="Ex.: Templo principal"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="atividade-inicio">
+                            Data e hora de início
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="atividade-inicio"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="atividade-fim">
+                            Data e hora de término
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="atividade-fim"
+                        >
+                    </div>
+
+                    <div class="campo campo-formulario-maior">
+                        <label for="atividade-descricao">
+                            Descrição
+                        </label>
+
+                        <textarea
+                            id="atividade-descricao"
+                            maxlength="1000"
+                            rows="4"
+                            placeholder="Descreva o objetivo e os detalhes da atividade"
+                        ></textarea>
+                    </div>
+
+                    <div class="campo campo-formulario-maior">
+                        <label for="atividade-observacoes">
+                            Notas e lembretes
+                        </label>
+
+                        <textarea
+                            id="atividade-observacoes"
+                            maxlength="1000"
+                            rows="4"
+                            placeholder="Informações internas para pastores e líderes"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div class="acoes-formulario">
+                    <button
+                        type="button"
+                        id="botao-cancelar-formulario-atividade"
+                    >
+                        Voltar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="botao-salvar-atividade"
+                    >
+                        Salvar atividade
+                    </button>
+                </div>
+
+                <p id="mensagem-formulario-atividade"></p>
+            </form>
+        </section>
+
+        <!-- Resumo das atividades -->
+
+        <section class="resumo-atividades">
+            <article class="card-mini-resumo">
+                <span>Total</span>
+                <strong id="total-atividades-pagina">—</strong>
+            </article>
+
+            <article class="card-mini-resumo">
+                <span>Agendadas</span>
+                <strong id="total-atividades-agendadas">—</strong>
+            </article>
+
+            <article class="card-mini-resumo">
+                <span>Realizadas</span>
+                <strong id="total-atividades-realizadas">—</strong>
+            </article>
+
+            <article class="card-mini-resumo">
+                <span>Canceladas</span>
+                <strong id="total-atividades-canceladas">—</strong>
+            </article>
+        </section>
+
+        <!-- Tabela de atividades -->
+
+        <section class="tabela-container">
+            <div class="tabela-cabecalho">
+                <div>
+                    <h2>Agenda de atividades</h2>
+
+                    <p id="quantidade-atividades">
+                        Carregando atividades...
+                    </p>
+                </div>
+            </div>
+
+            <div class="tabela-responsiva">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th>Atividade</th>
+                            <th>Tipo</th>
+                            <th>Data e horário</th>
+                            <th>Local</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="corpo-tabela-atividades">
+                        <tr>
+                            <td colspan="6">
+                                Carregando atividades...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <p id="mensagem-pagina-atividades"></p>
+    </main>
+
+    <!-- Modal de detalhes -->
+
+    <div
+        id="modal-atividade"
+        class="modal-overlay oculto"
+    >
+        <section
+            class="modal-ficha modal-atividade"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="detalhe-atividade-titulo"
+        >
+            <header class="modal-cabecalho">
+                <div>
+                    <p class="saudacao">
+                        Detalhes da atividade
+                    </p>
+
+                    <h2 id="detalhe-atividade-titulo">
+                        Carregando...
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-atividade"
+                    aria-label="Fechar detalhes"
+                >
+                    ×
+                </button>
+            </header>
+
+            <div class="detalhes-atividade">
+                <div class="ficha-grade">
+                    <div class="ficha-campo">
+                        <span>Tipo</span>
+                        <strong id="detalhe-atividade-tipo">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Status</span>
+                        <strong id="detalhe-atividade-status">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Início</span>
+                        <strong id="detalhe-atividade-inicio">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Término</span>
+                        <strong id="detalhe-atividade-fim">—</strong>
+                    </div>
+
+                    <div class="ficha-campo">
+                        <span>Local</span>
+                        <strong id="detalhe-atividade-local">—</strong>
+                    </div>
+
+                    <div class="ficha-campo ficha-campo-maior">
+                        <span>Descrição</span>
+                        <strong id="detalhe-atividade-descricao">—</strong>
+                    </div>
+
+                    <div class="ficha-campo ficha-campo-maior">
+                        <span>Notas e lembretes</span>
+
+                        <strong id="detalhe-atividade-observacoes">
+                            —
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="modal-rodape">
+                <button
+                    type="button"
+                    id="botao-lista-presenca"
+                    class="botao-status-ficha"
+                >
+                    Lista de presença
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-cancelar-atividade"
+                    class="botao-status-ficha"
+                >
+                    Cancelar atividade
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-editar-atividade"
+                    class="botao-editar-ficha"
+                >
+                    Editar
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-fechar-atividade-rodape"
+                >
+                    Fechar
+                </button>
+            </footer>
+        </section>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/atividades.js"></script>
+</body>
+</html>

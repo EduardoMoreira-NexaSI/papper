@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Frequência | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+
+    <aside class="menu-lateral">
+
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html" class="ativo">
+                Frequência
+            </a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+
+    </aside>
+
+    <main class="conteudo-dashboard">
+
+        <header class="cabecalho-dashboard">
+
+            <div>
+                <p class="saudacao">
+                    Gestão de atividades
+                </p>
+
+                <h1>Frequência</h1>
+            </div>
+
+            <div class="usuario-logado">
+
+                <div
+                    class="usuario-avatar"
+                    id="usuario-avatar"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <section class="atividade-presenca-cabecalho">
+
+            <div>
+
+                <a
+                    href="atividades.html"
+                    class="link-voltar"
+                >
+                    ← Voltar para atividades
+                </a>
+
+                <p class="etiqueta">
+                    Atividade selecionada
+                </p>
+
+                <h2 id="atividade-presenca-titulo">
+                    Carregando atividade...
+                </h2>
+
+                <p id="atividade-presenca-informacoes">
+                    Aguarde enquanto buscamos os dados.
+                </p>
+
+            </div>
+
+            <span
+                id="atividade-presenca-status"
+                class="status-atividade status-agendado"
+            >
+                Carregando
+            </span>
+
+        </section>
+
+        <section class="resumo-presencas">
+
+            <article class="cartao-resumo-presenca">
+                <span>Total registrado</span>
+                <strong id="total-presencas">0</strong>
+            </article>
+
+            <article class="cartao-resumo-presenca presente">
+                <span>Presentes</span>
+                <strong id="total-presentes">0</strong>
+            </article>
+
+            <article class="cartao-resumo-presenca confirmado">
+                <span>Confirmados</span>
+                <strong id="total-confirmados">0</strong>
+            </article>
+
+            <article class="cartao-resumo-presenca ausente">
+                <span>Ausentes</span>
+                <strong id="total-ausentes">0</strong>
+            </article>
+
+            <article class="cartao-resumo-presenca justificado">
+                <span>Justificados</span>
+                <strong id="total-justificados">0</strong>
+            </article>
+
+        </section>
+
+        <section class="barra-acoes barra-acoes-presenca">
+
+            <div class="campo-pesquisa">
+
+                <label for="pesquisa-presenca">
+                    Pesquisar membro
+                </label>
+
+                <input
+                    type="search"
+                    id="pesquisa-presenca"
+                    placeholder="Digite o nome ou CPF"
+                >
+
+            </div>
+
+            <div class="campo-filtro">
+
+                <label for="filtro-presenca">
+                    Situação
+                </label>
+
+                <select id="filtro-presenca">
+
+                    <option value="todos">
+                        Todos
+                    </option>
+
+                    <option value="sem_registro">
+                        Sem registro
+                    </option>
+
+                    <option value="presente">
+                        Presentes
+                    </option>
+
+                    <option value="confirmado">
+                        Confirmados
+                    </option>
+
+                    <option value="ausente">
+                        Ausentes
+                    </option>
+
+                    <option value="justificado">
+                        Justificados
+                    </option>
+
+                </select>
+
+            </div>
+
+        </section>
+
+        <section class="tabela-container">
+
+            <div class="tabela-cabecalho">
+
+                <div>
+                    <h2>Membros da igreja</h2>
+
+                    <p id="quantidade-membros-presenca">
+                        Carregando...
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="tabela-responsiva">
+
+                <table class="tabela-dados tabela-presencas">
+
+                    <thead>
+                        <tr>
+                            <th>Membro</th>
+                            <th>CPF</th>
+                            <th>Situação</th>
+                            <th>Observação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="corpo-tabela-presencas">
+
+                        <tr>
+                            <td colspan="5">
+                                Carregando membros...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <p id="mensagem-pagina-presencas"></p>
+
+    </main>
+
+    <div
+        id="modal-registrar-presenca"
+        class="modal-fundo oculto"
+    >
+
+        <section class="modal-conteudo modal-presenca">
+
+            <header class="modal-cabecalho">
+
+                <div>
+                    <span class="etiqueta">
+                        Registro de frequência
+                    </span>
+
+                    <h2 id="modal-presenca-nome">
+                        Membro
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-modal-presenca"
+                    aria-label="Fechar"
+                >
+                    ×
+                </button>
+
+            </header>
+
+            <form id="form-presenca">
+
+                <div class="campo">
+
+                    <label for="presenca-status">
+                        Situação
+                    </label>
+
+                    <select id="presenca-status" required>
+
+                        <option value="presente">
+                            Presente
+                        </option>
+
+                        <option value="confirmado">
+                            Confirmado
+                        </option>
+
+                        <option value="ausente">
+                            Ausente
+                        </option>
+
+                        <option value="justificado">
+                            Justificado
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="campo">
+
+                    <label for="presenca-observacao">
+                        Observação
+                    </label>
+
+                    <textarea
+                        id="presenca-observacao"
+                        rows="4"
+                        maxlength="500"
+                        placeholder="Observação opcional"
+                    ></textarea>
+
+                </div>
+
+                <p id="mensagem-formulario-presenca"></p>
+
+                <div class="acoes-formulario">
+
+                    <button
+                        type="button"
+                        id="botao-cancelar-modal-presenca"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="botao-salvar-presenca"
+                    >
+                        Salvar frequência
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/frequencia.js"></script>
+
+</body>
+</html>

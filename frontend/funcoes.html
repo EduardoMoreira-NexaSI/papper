@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Funções | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper — Painel Gerencial Pastoral"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao" aria-label="Menu principal">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html">Frequência</a>
+            <a href="financeiro.html">Financeiro</a>
+
+            <a
+                href="funcoes.html"
+                class="ativo"
+                aria-current="page"
+            >
+                Funções
+            </a>
+
+            <a href="grupos.html">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="conteudo-dashboard pagina-funcoes">
+        <header class="cabecalho-dashboard">
+            <div>
+                <p class="saudacao">
+                    Organização da igreja
+                </p>
+
+                <h1>Funções</h1>
+            </div>
+
+            <div class="usuario-logado">
+                <div
+                    class="usuario-avatar"
+                    id="usuario-avatar"
+                    aria-hidden="true"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+            </div>
+        </header>
+
+        <p class="introducao-funcoes">
+            Cadastre funções como obreiro, diácono e pastor auxiliar
+            e organize os membros responsáveis por cada uma.
+            Um membro pode exercer mais de uma função.
+        </p>
+
+        <p class="aviso-permissoes-funcoes">
+            As funções representam responsabilidades na igreja.
+            Atribuir uma função não altera o perfil de acesso
+            do usuário ao sistema.
+        </p>
+
+        <!-- INDICADORES -->
+        <section
+            class="resumo-funcoes"
+            aria-label="Resumo das funções"
+        >
+            <article class="cartao-resumo-funcao">
+                <span>Funções ativas</span>
+
+                <strong id="total-funcoes-ativas">—</strong>
+
+                <small>
+                    Responsabilidades disponíveis para atribuição
+                </small>
+            </article>
+
+            <article class="cartao-resumo-funcao">
+                <span>Membros com função</span>
+
+                <strong id="total-membros-com-funcao">—</strong>
+
+                <small>
+                    Membros distintos vinculados a funções ativas
+                </small>
+            </article>
+
+            <article class="cartao-resumo-funcao destaque">
+                <span>Funções sem membros</span>
+
+                <strong id="total-funcoes-sem-membros">—</strong>
+
+                <small>
+                    Funções ativas ainda sem responsáveis
+                </small>
+            </article>
+        </section>
+
+        <!-- PESQUISA E FILTROS -->
+        <section
+            class="barra-acoes barra-acoes-funcoes"
+            aria-label="Pesquisa e ações"
+        >
+            <div class="campo-pesquisa">
+                <label for="pesquisa-funcao">
+                    Pesquisar função
+                </label>
+
+                <input
+                    type="search"
+                    id="pesquisa-funcao"
+                    placeholder="Digite o nome da função"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label for="filtro-status-funcao">
+                    Situação
+                </label>
+
+                <select id="filtro-status-funcao">
+                    <option value="ativas">Ativas</option>
+                    <option value="inativas">Inativas</option>
+                    <option value="todas">Todas</option>
+                </select>
+            </div>
+
+            <button
+                type="button"
+                id="botao-nova-funcao"
+                aria-controls="formulario-funcao-container"
+                aria-expanded="false"
+                disabled
+            >
+                + Nova função
+            </button>
+        </section>
+
+        <!-- CADASTRO E EDIÇÃO -->
+        <section
+            id="formulario-funcao-container"
+            class="formulario-painel oculto"
+            aria-labelledby="titulo-formulario-funcao"
+            hidden
+        >
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">
+                        Responsabilidades
+                    </span>
+
+                    <h2 id="titulo-formulario-funcao">
+                        Nova função
+                    </h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-formulario-funcao"
+                    aria-label="Fechar formulário de função"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form id="form-funcao">
+                <div class="grade-formulario">
+                    <div class="campo campo-largura-total">
+                        <label for="funcao-nome">
+                            Nome da função
+                        </label>
+
+                        <input
+                            type="text"
+                            id="funcao-nome"
+                            name="nome"
+                            minlength="2"
+                            maxlength="100"
+                            placeholder="Ex.: Obreiro"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo campo-largura-total">
+                        <label for="funcao-descricao">
+                            Descrição
+                        </label>
+
+                        <textarea
+                            id="funcao-descricao"
+                            name="descricao"
+                            maxlength="250"
+                            rows="4"
+                            placeholder="Descreva as responsabilidades desta função"
+                            aria-describedby="ajuda-descricao-funcao"
+                        ></textarea>
+
+                        <small
+                            id="ajuda-descricao-funcao"
+                            class="ajuda-campo"
+                        >
+                            Opcional. Máximo de 250 caracteres.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="acoes-formulario">
+                    <button
+                        type="button"
+                        id="botao-cancelar-funcao"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="botao-salvar-funcao"
+                    >
+                        Salvar função
+                    </button>
+                </div>
+
+                <p
+                    id="mensagem-formulario-funcao"
+                    role="status"
+                    aria-live="polite"
+                ></p>
+            </form>
+        </section>
+
+        <!-- LISTA DE FUNÇÕES -->
+        <section
+            class="painel-listagem-funcoes"
+            aria-labelledby="titulo-listagem-funcoes"
+        >
+            <div class="tabela-cabecalho">
+                <div>
+                    <h2 id="titulo-listagem-funcoes">
+                        Funções da igreja
+                    </h2>
+
+                    <p
+                        id="quantidade-funcoes"
+                        aria-live="polite"
+                    >
+                        Aguardando carregamento...
+                    </p>
+                </div>
+            </div>
+
+            <div id="lista-funcoes" class="grade-funcoes">
+                <p class="estado-listagem">
+                    Aguardando carregamento das funções.
+                </p>
+            </div>
+        </section>
+
+        <!-- MODELO DOS CARTÕES: SERÁ PREENCHIDO PELO JAVASCRIPT -->
+        <template id="template-cartao-funcao">
+            <article class="cartao-funcao">
+                <div class="cabecalho-cartao-funcao">
+                    <h3 data-campo="nome"></h3>
+
+                    <span
+                        class="selo-status-funcao"
+                        data-campo="status"
+                    ></span>
+                </div>
+
+                <p
+                    class="descricao-cartao-funcao"
+                    data-campo="descricao"
+                ></p>
+
+                <div class="informacoes-cartao-funcao">
+                    <span>Membros vinculados</span>
+
+                    <strong data-campo="quantidade-membros">
+                        —
+                    </strong>
+                </div>
+
+                <div class="acoes-cartao-funcao">
+                    <button
+                        type="button"
+                        data-acao="detalhes"
+                    >
+                        Ver membros
+                    </button>
+
+                    <button
+                        type="button"
+                        data-acao="editar"
+                        data-gerenciamento
+                    >
+                        Editar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="botao-status-funcao"
+                        data-acao="status"
+                        data-gerenciamento
+                    >
+                        Desativar
+                    </button>
+                </div>
+            </article>
+        </template>
+
+        <!-- DETALHES E MEMBROS VINCULADOS -->
+        <section
+            id="detalhes-funcao-container"
+            class="formulario-painel painel-detalhes-funcao oculto"
+            aria-labelledby="detalhes-funcao-nome"
+            hidden
+        >
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">
+                        Membros vinculados
+                    </span>
+
+                    <h2 id="detalhes-funcao-nome">
+                        Detalhes da função
+                    </h2>
+
+                    <p id="detalhes-funcao-descricao"></p>
+
+                    <span
+                        id="detalhes-funcao-status"
+                        class="selo-status-funcao"
+                    ></span>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-detalhes-funcao"
+                    aria-label="Fechar detalhes da função"
+                >
+                    ×
+                </button>
+            </div>
+
+            <p
+                id="aviso-funcao-inativa"
+                class="aviso-funcao-inativa oculto"
+                hidden
+            >
+                Esta função está desativada. Reative-a para
+                atribuí-la a novos membros. Os vínculos existentes
+                permanecem cadastrados.
+            </p>
+
+            <!-- ATRIBUIR A FUNÇÃO A UM MEMBRO -->
+            <form
+                id="form-vincular-membro-funcao"
+                class="adicionar-membro-funcao"
+            >
+                <div class="campo">
+                    <label for="pesquisa-membro-funcao">
+                        Buscar membro
+                    </label>
+
+                    <input
+                        type="search"
+                        id="pesquisa-membro-funcao"
+                        placeholder="Digite o nome do membro"
+                        autocomplete="off"
+                        aria-controls="selecionar-membro-funcao"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="selecionar-membro-funcao">
+                        Membro
+                    </label>
+
+                    <select
+                        id="selecionar-membro-funcao"
+                        name="membro_id"
+                        aria-describedby="ajuda-vincular-membro-funcao"
+                        required
+                    >
+                        <option value="">
+                            Selecione um membro
+                        </option>
+                    </select>
+
+                    <small
+                        id="ajuda-vincular-membro-funcao"
+                        class="ajuda-campo"
+                    >
+                        Selecione um membro ainda não vinculado
+                        a esta função.
+                    </small>
+                </div>
+
+                <button
+                    type="submit"
+                    id="botao-adicionar-membro-funcao"
+                    disabled
+                >
+                    Atribuir função
+                </button>
+            </form>
+
+            <div class="tabela-cabecalho">
+                <div>
+                    <h3>Membros nesta função</h3>
+
+                    <p
+                        id="quantidade-membros-funcao"
+                        aria-live="polite"
+                    >
+                        Selecione uma função.
+                    </p>
+                </div>
+            </div>
+
+            <div class="tabela-responsiva">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Situação do membro</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="corpo-tabela-membros-funcao">
+                        <tr>
+                            <td colspan="3">
+                                Selecione uma função para
+                                consultar os membros.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="ajuda-campo">
+                Remover o vínculo retira apenas esta função
+                do membro, sem excluir seu cadastro.
+            </p>
+
+            <p
+                id="mensagem-detalhes-funcao"
+                role="status"
+                aria-live="polite"
+            ></p>
+        </section>
+
+        <p
+            id="mensagem-pagina-funcoes"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+        <noscript>
+            <p>
+                Ative o JavaScript no navegador para utilizar
+                o gerenciamento de funções.
+            </p>
+        </noscript>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/funcoes.js"></script>
+</body>
+</html>

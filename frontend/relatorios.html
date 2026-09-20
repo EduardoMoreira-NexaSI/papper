@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Relatórios | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+    <!-- MENU LATERAL -->
+    <aside class="menu-lateral">
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper — Painel Gerencial Pastoral"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao" aria-label="Menu principal">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html">Frequência</a>
+            <a href="financeiro.html">Financeiro</a>
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html">Grupos</a>
+
+            <a
+                href="relatorios.html"
+                class="ativo"
+                aria-current="page"
+            >
+                Relatórios
+            </a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="conteudo-dashboard pagina-relatorios">
+        <header class="cabecalho-dashboard">
+            <div>
+                <p class="saudacao">
+                    Informações para a gestão pastoral
+                </p>
+
+                <h1>Relatórios</h1>
+            </div>
+
+            <div class="usuario-logado">
+                <div
+                    class="usuario-avatar"
+                    id="usuario-avatar"
+                    aria-hidden="true"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+            </div>
+        </header>
+
+        <p class="introducao-relatorios">
+            Selecione o relatório, configure os filtros e consulte
+            os resultados antes de gerar um PDF para impressão
+            ou compartilhamento autorizado.
+        </p>
+
+        <!-- CONTEXTO E PRIVACIDADE -->
+        <section
+            class="contexto-relatorios"
+            aria-labelledby="titulo-contexto-relatorios"
+        >
+            <div>
+                <h2 id="titulo-contexto-relatorios">
+                    Igreja do relatório
+                </h2>
+
+                <strong id="relatorio-igreja-nome">
+                    Aguardando identificação...
+                </strong>
+
+                <p>
+                    Os relatórios serão limitados à igreja vinculada
+                    ao seu acesso.
+                </p>
+            </div>
+
+            <p class="aviso-privacidade-relatorios">
+                Os documentos podem conter dados pessoais e
+                financeiros. Inclua apenas as informações necessárias
+                e compartilhe somente com pessoas autorizadas.
+            </p>
+        </section>
+
+        <!-- FORMULÁRIO PRINCIPAL -->
+        <form id="form-relatorio">
+            <!-- ESCOLHA DO RELATÓRIO -->
+            <section
+                class="formulario-painel configuracao-relatorio"
+                aria-labelledby="titulo-configuracao-relatorio"
+            >
+                <div class="titulo-formulario">
+                    <div>
+                        <span class="etiqueta">1. Selecionar</span>
+
+                        <h2 id="titulo-configuracao-relatorio">
+                            Qual relatório deseja consultar?
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="relatorio-tipo">
+                            Tipo de relatório
+                        </label>
+
+                        <select
+                            id="relatorio-tipo"
+                            name="tipo_relatorio"
+                            aria-describedby="relatorio-tipo-descricao"
+                            disabled
+                            required
+                        >
+                            <option value="membros">
+                                Membros e cadastro
+                            </option>
+
+                            <option value="financeiro">
+                                Financeiro e fluxo de caixa
+                            </option>
+
+                            <option value="atividades">
+                                Atividades e eventos
+                            </option>
+
+                            <option value="frequencia">
+                                Frequência e participação
+                            </option>
+
+                            <option value="funcoes">
+                                Funções e membros vinculados
+                            </option>
+
+                            <option value="grupos">
+                                Grupos e integrantes
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="relatorio-titulo">
+                            Título do documento
+                        </label>
+
+                        <input
+                            type="text"
+                            id="relatorio-titulo"
+                            name="titulo"
+                            maxlength="120"
+                            value="Relatório de membros"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <p
+                    id="relatorio-tipo-descricao"
+                    class="ajuda-campo"
+                >
+                    Consulte os membros por situação, função,
+                    grupo e localização.
+                </p>
+            </section>
+
+            <!-- FILTROS DE MEMBROS -->
+            <section
+                id="filtros-membros"
+                class="formulario-painel filtros-relatorio"
+                aria-labelledby="titulo-filtros-membros"
+            >
+                <div class="titulo-formulario">
+                    <div>
+                        <span class="etiqueta">2. Filtrar</span>
+
+                        <h2 id="titulo-filtros-membros">
+                            Membros
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="membros-situacao">
+                            Situação do membro
+                        </label>
+
+                        <select id="membros-situacao" name="membros_situacao">
+                            <option value="todos">Todos</option>
+                            <option value="ativos">Ativos</option>
+                            <option value="inativos">Inativos</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-pesquisa">
+                            Nome ou CPF
+                        </label>
+
+                        <input
+                            type="search"
+                            id="membros-pesquisa"
+                            name="membros_pesquisa"
+                            placeholder="Digite o nome ou CPF"
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-funcao">
+                            Função
+                        </label>
+
+                        <select id="membros-funcao" name="membros_funcao">
+                            <option value="">Todas as funções</option>
+                            <option value="sem_funcao">Sem função vinculada</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-grupo">
+                            Grupo
+                        </label>
+
+                        <select id="membros-grupo" name="membros_grupo">
+                            <option value="">Todos os grupos</option>
+                            <option value="sem_grupo">Sem grupo vinculado</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-estado">
+                            Estado — UF
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membros-estado"
+                            name="membros_estado"
+                            minlength="2"
+                            maxlength="2"
+                            pattern="[A-Za-z]{2}"
+                            placeholder="Ex.: RJ"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-cidade">
+                            Cidade
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membros-cidade"
+                            name="membros_cidade"
+                            maxlength="100"
+                            placeholder="Ex.: Duque de Caxias"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-bairro">
+                            Bairro
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membros-bairro"
+                            name="membros_bairro"
+                            maxlength="100"
+                            placeholder="Ex.: Centro"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-logradouro">
+                            Rua ou logradouro
+                        </label>
+
+                        <input
+                            type="text"
+                            id="membros-logradouro"
+                            name="membros_logradouro"
+                            maxlength="180"
+                            placeholder="Parte do nome da rua"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-idade-minima">
+                            Idade mínima
+                        </label>
+
+                        <input
+                            type="number"
+                            id="membros-idade-minima"
+                            name="membros_idade_minima"
+                            min="0"
+                            max="130"
+                            step="1"
+                            placeholder="Sem limite"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-idade-maxima">
+                            Idade máxima
+                        </label>
+
+                        <input
+                            type="number"
+                            id="membros-idade-maxima"
+                            name="membros_idade_maxima"
+                            min="0"
+                            max="130"
+                            step="1"
+                            placeholder="Sem limite"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-mes-aniversario">
+                            Aniversariantes do mês
+                        </label>
+
+                        <select
+                            id="membros-mes-aniversario"
+                            name="membros_mes_aniversario"
+                        >
+                            <option value="">Todos os meses</option>
+                            <option value="1">Janeiro</option>
+                            <option value="2">Fevereiro</option>
+                            <option value="3">Março</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Maio</option>
+                            <option value="6">Junho</option>
+                            <option value="7">Julho</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="membros-ordenacao">
+                            Ordenar por
+                        </label>
+
+                        <select
+                            id="membros-ordenacao"
+                            name="membros_ordenacao"
+                        >
+                            <option value="nome">Nome</option>
+                            <option value="bairro">Bairro e nome</option>
+                            <option value="cidade">Cidade e nome</option>
+                            <option value="nascimento">Data de nascimento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <p class="ajuda-campo">
+                    Os filtros são combinados. Por exemplo:
+                    membros ativos, com função de obreiro,
+                    que moram em determinado bairro.
+                    Filtros de idade ou aniversário não incluem
+                    cadastros sem data de nascimento.
+                </p>
+
+                <fieldset class="opcoes-colunas-relatorio">
+                    <legend>Dados pessoais no documento</legend>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="membros-incluir-contato"
+                            name="membros_incluir_contato"
+                        >
+                        <span>Incluir contato</span>
+                    </label>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="membros-incluir-endereco"
+                            name="membros_incluir_endereco"
+                        >
+                        <span>Incluir endereço completo</span>
+                    </label>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="membros-incluir-nascimento"
+                            name="membros_incluir_nascimento"
+                        >
+                        <span>Incluir data de nascimento</span>
+                    </label>
+
+                    <div class="campo">
+                        <label for="membros-exibicao-cpf">
+                            Exibição do CPF
+                        </label>
+
+                        <select
+                            id="membros-exibicao-cpf"
+                            name="membros_exibicao_cpf"
+                        >
+                            <option value="oculto">Não incluir</option>
+                            <option value="mascarado">Incluir mascarado</option>
+                            <option value="completo">Incluir completo</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </section>
+
+            <!-- PERÍODO: FINANCEIRO, ATIVIDADES E FREQUÊNCIA -->
+            <section
+                id="filtros-periodo"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-periodo"
+                hidden
+            >
+                <h2 id="titulo-filtros-periodo">
+                    Período do relatório
+                </h2>
+
+                <fieldset id="campos-periodo" disabled>
+                    <legend>Selecione as datas</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="periodo-atalho">
+                                Período rápido
+                            </label>
+
+                            <select id="periodo-atalho" name="periodo_atalho">
+                                <option value="personalizado">Personalizado</option>
+                                <option value="mes_atual">Mês atual</option>
+                                <option value="mes_anterior">Mês anterior</option>
+                                <option value="trimestre_atual">Trimestre atual</option>
+                                <option value="ano_atual">Ano atual</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="relatorio-data-inicio">
+                                Data inicial
+                            </label>
+
+                            <input
+                                type="date"
+                                id="relatorio-data-inicio"
+                                name="data_inicio"
+                                required
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="relatorio-data-fim">
+                                Data final
+                            </label>
+
+                            <input
+                                type="date"
+                                id="relatorio-data-fim"
+                                name="data_fim"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <p id="ajuda-periodo" class="ajuda-campo">
+                        As datas inicial e final serão incluídas no período.
+                    </p>
+                </fieldset>
+            </section>
+
+            <!-- FINANCEIRO -->
+            <section
+                id="filtros-financeiro"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-financeiro"
+                hidden
+            >
+                <h2 id="titulo-filtros-financeiro">
+                    Financeiro
+                </h2>
+
+                <fieldset id="campos-financeiro" disabled>
+                    <legend>Filtros financeiros</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="financeiro-modelo">
+                                Modelo
+                            </label>
+
+                            <select id="financeiro-modelo" name="financeiro_modelo">
+                                <option value="resumo">Resumo financeiro</option>
+                                <option value="extrato">Extrato de movimentações</option>
+                                <option value="fluxo">Fluxo de caixa realizado</option>
+                                <option value="categorias">Entradas e saídas por categoria</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-tipo">
+                                Tipo de movimentação
+                            </label>
+
+                            <select id="financeiro-tipo" name="financeiro_tipo">
+                                <option value="">Entradas e saídas</option>
+                                <option value="entrada">Somente entradas</option>
+                                <option value="saida">Somente saídas</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-categoria">
+                                Categoria
+                            </label>
+
+                            <select
+                                id="financeiro-categoria"
+                                name="financeiro_categoria"
+                            >
+                                <option value="">Todas</option>
+                                <option value="dizimo">Dízimo</option>
+                                <option value="oferta">Oferta</option>
+                                <option value="doacao">Doação</option>
+                                <option value="despesa">Despesa</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-forma-pagamento">
+                                Forma de pagamento
+                            </label>
+
+                            <select
+                                id="financeiro-forma-pagamento"
+                                name="financeiro_forma_pagamento"
+                            >
+                                <option value="">Todas</option>
+                                <option value="sem_informacao">Não informada</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-membro">
+                                Membro vinculado
+                            </label>
+
+                            <select id="financeiro-membro" name="financeiro_membro">
+                                <option value="">Todos</option>
+                                <option value="sem_vinculo">Sem vínculo com membro</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-atividade">
+                                Atividade vinculada
+                            </label>
+
+                            <select
+                                id="financeiro-atividade"
+                                name="financeiro_atividade"
+                            >
+                                <option value="">Todas</option>
+                                <option value="sem_vinculo">Sem vínculo com atividade</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="financeiro-agrupamento">
+                                Agrupamento do fluxo
+                            </label>
+
+                            <select
+                                id="financeiro-agrupamento"
+                                name="financeiro_agrupamento"
+                            >
+                                <option value="dia">Por dia</option>
+                                <option value="mes">Por mês</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="financeiro-identificar-membros"
+                            name="financeiro_identificar_membros"
+                        >
+                        <span>
+                            Identificar os membros vinculados aos lançamentos
+                        </span>
+                    </label>
+
+                    <p class="ajuda-campo">
+                        O fluxo representa movimentações registradas, não
+                        previsões de contas a pagar ou receber.
+                        Saldo anterior e saldo acumulado dependem do histórico
+                        registrado. Com filtros de categoria ou membro,
+                        os valores representam apenas o recorte selecionado.
+                    </p>
+                </fieldset>
+            </section>
+
+            <!-- ATIVIDADES -->
+            <section
+                id="filtros-atividades"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-atividades"
+                hidden
+            >
+                <h2 id="titulo-filtros-atividades">
+                    Atividades e eventos
+                </h2>
+
+                <fieldset id="campos-atividades" disabled>
+                    <legend>Filtros das atividades</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="atividades-tipo">
+                                Tipo de atividade
+                            </label>
+
+                            <select id="atividades-tipo" name="atividades_tipo">
+                                <option value="">Todos os tipos</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="atividades-status">
+                                Situação
+                            </label>
+
+                            <select id="atividades-status" name="atividades_status">
+                                <option value="">Todas as situações</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="atividades-pesquisa">
+                                Título
+                            </label>
+
+                            <input
+                                type="search"
+                                id="atividades-pesquisa"
+                                name="atividades_pesquisa"
+                                placeholder="Pesquisar atividade"
+                            >
+                        </div>
+
+                        <div class="campo">
+                            <label for="atividades-local">
+                                Local
+                            </label>
+
+                            <input
+                                type="text"
+                                id="atividades-local"
+                                name="atividades_local"
+                                maxlength="150"
+                                placeholder="Filtrar pelo local"
+                            >
+                        </div>
+                    </div>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="atividades-incluir-observacoes"
+                            name="atividades_incluir_observacoes"
+                        >
+                        <span>Incluir observações internas</span>
+                    </label>
+
+                    <p class="ajuda-campo">
+                        O período considera a data de início da atividade.
+                        Observações internas serão incluídas somente
+                        quando o perfil permitir.
+                    </p>
+                </fieldset>
+            </section>
+
+            <!-- FREQUÊNCIA -->
+            <section
+                id="filtros-frequencia"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-frequencia"
+                hidden
+            >
+                <h2 id="titulo-filtros-frequencia">
+                    Frequência e participação
+                </h2>
+
+                <fieldset id="campos-frequencia" disabled>
+                    <legend>Filtros da frequência</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="frequencia-modelo">
+                                Modelo
+                            </label>
+
+                            <select id="frequencia-modelo" name="frequencia_modelo">
+                                <option value="atividade">Lista por atividade</option>
+                                <option value="membro">Histórico por membro</option>
+                                <option value="resumo">Resumo de participação</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="frequencia-atividade">
+                                Atividade
+                            </label>
+
+                            <select
+                                id="frequencia-atividade"
+                                name="frequencia_atividade"
+                            >
+                                <option value="">Todas no período</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="frequencia-membro">
+                                Membro
+                            </label>
+
+                            <select id="frequencia-membro" name="frequencia_membro">
+                                <option value="">Todos os membros</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="frequencia-status">
+                                Registro de participação
+                            </label>
+
+                            <select id="frequencia-status" name="frequencia_status">
+                                <option value="">Todos</option>
+                                <option value="presente">Presente</option>
+                                <option value="ausente">Ausente</option>
+                                <option value="justificado">Justificado</option>
+                                <option value="confirmado">Confirmado</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="frequencia-grupo">
+                                Integrantes do grupo
+                            </label>
+
+                            <select id="frequencia-grupo" name="frequencia_grupo">
+                                <option value="">Todos os grupos</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="frequencia-funcao">
+                                Membros com a função
+                            </label>
+
+                            <select id="frequencia-funcao" name="frequencia_funcao">
+                                <option value="">Todas as funções</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <p class="ajuda-campo">
+                        Ausência de registro não significa falta.
+                        Confirmação também não significa comparecimento.
+                        O relatório informará a base de cálculo dos
+                        percentuais. Filtros de grupo e função consideram
+                        os vínculos atuais, não vínculos históricos.
+                    </p>
+                </fieldset>
+            </section>
+
+            <!-- FUNÇÕES -->
+            <section
+                id="filtros-funcoes"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-funcoes"
+                hidden
+            >
+                <h2 id="titulo-filtros-funcoes">
+                    Funções da igreja
+                </h2>
+
+                <fieldset id="campos-funcoes" disabled>
+                    <legend>Filtros das funções</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="funcoes-situacao">
+                                Situação da função
+                            </label>
+
+                            <select id="funcoes-situacao" name="funcoes_situacao">
+                                <option value="todas">Todas</option>
+                                <option value="ativas">Ativas</option>
+                                <option value="inativas">Inativas</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="funcoes-selecao">
+                                Função específica
+                            </label>
+
+                            <select id="funcoes-selecao" name="funcoes_selecao">
+                                <option value="">Todas as funções</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="funcoes-situacao-membro">
+                                Situação dos membros
+                            </label>
+
+                            <select
+                                id="funcoes-situacao-membro"
+                                name="funcoes_situacao_membro"
+                            >
+                                <option value="todos">Todos</option>
+                                <option value="ativos">Ativos</option>
+                                <option value="inativos">Inativos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="funcoes-incluir-membros"
+                            name="funcoes_incluir_membros"
+                            checked
+                        >
+                        <span>Incluir lista de membros vinculados</span>
+                    </label>
+                </fieldset>
+            </section>
+
+            <!-- GRUPOS -->
+            <section
+                id="filtros-grupos"
+                class="formulario-painel filtros-relatorio oculto"
+                aria-labelledby="titulo-filtros-grupos"
+                hidden
+            >
+                <h2 id="titulo-filtros-grupos">
+                    Grupos e ministérios
+                </h2>
+
+                <fieldset id="campos-grupos" disabled>
+                    <legend>Filtros dos grupos</legend>
+
+                    <div class="grade-formulario">
+                        <div class="campo">
+                            <label for="grupos-situacao">
+                                Situação do grupo
+                            </label>
+
+                            <select id="grupos-situacao" name="grupos_situacao">
+                                <option value="todos">Todos</option>
+                                <option value="ativos">Ativos</option>
+                                <option value="inativos">Inativos</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="grupos-selecao">
+                                Grupo específico
+                            </label>
+
+                            <select id="grupos-selecao" name="grupos_selecao">
+                                <option value="">Todos os grupos</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="grupos-lideranca">
+                                Liderança
+                            </label>
+
+                            <select id="grupos-lideranca" name="grupos_lideranca">
+                                <option value="todos">Todos</option>
+                                <option value="com_lider">Com líder</option>
+                                <option value="sem_lider">Sem líder definido</option>
+                            </select>
+                        </div>
+
+                        <div class="campo">
+                            <label for="grupos-situacao-membro">
+                                Situação dos integrantes
+                            </label>
+
+                            <select
+                                id="grupos-situacao-membro"
+                                name="grupos_situacao_membro"
+                            >
+                                <option value="todos">Todos</option>
+                                <option value="ativos">Ativos</option>
+                                <option value="inativos">Inativos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="opcao-relatorio">
+                        <input
+                            type="checkbox"
+                            id="grupos-incluir-integrantes"
+                            name="grupos_incluir_integrantes"
+                            checked
+                        >
+                        <span>Incluir lista de integrantes</span>
+                    </label>
+                </fieldset>
+            </section>
+
+            <!-- CONFIGURAÇÃO DO DOCUMENTO -->
+            <section
+                class="formulario-painel opcoes-documento"
+                aria-labelledby="titulo-opcoes-documento"
+            >
+                <div class="titulo-formulario">
+                    <div>
+                        <span class="etiqueta">3. Preparar documento</span>
+
+                        <h2 id="titulo-opcoes-documento">
+                            Apresentação do PDF
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="grade-formulario">
+                    <div class="campo">
+                        <label for="pdf-orientacao">
+                            Orientação — papel A4
+                        </label>
+
+                        <select id="pdf-orientacao" name="pdf_orientacao">
+                            <option value="retrato">Retrato</option>
+                            <option value="paisagem">Paisagem</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="pdf-assinatura">
+                            Campo de assinatura
+                        </label>
+
+                        <select id="pdf-assinatura" name="pdf_assinatura">
+                            <option value="nenhuma">Sem campo de assinatura</option>
+                            <option value="responsavel">Responsável pelo relatório</option>
+                            <option value="pastor">Pastor responsável</option>
+                            <option value="tesoureiro">Tesoureiro responsável</option>
+                        </select>
+                    </div>
+
+                    <div class="campo campo-largura-total">
+                        <label for="pdf-observacoes">
+                            Observações para o documento
+                        </label>
+
+                        <textarea
+                            id="pdf-observacoes"
+                            name="pdf_observacoes"
+                            rows="3"
+                            maxlength="1000"
+                            placeholder="Observações que devem constar no relatório"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <p class="ajuda-campo">
+                    O documento deverá apresentar a identificação da igreja,
+                    os filtros aplicados, a data e hora de emissão,
+                    o responsável pela geração e a numeração das páginas.
+                    O campo de assinatura é um espaço para assinatura
+                    manual, não uma assinatura digital.
+                </p>
+            </section>
+
+            <!-- AÇÕES -->
+            <div class="acoes-relatorio">
+                <button
+                    type="button"
+                    id="botao-limpar-filtros"
+                >
+                    Limpar filtros
+                </button>
+
+                <button
+                    type="submit"
+                    id="botao-consultar-relatorio"
+                    disabled
+                >
+                    Consultar relatório
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-gerar-pdf"
+                    aria-describedby="ajuda-gerar-pdf"
+                    disabled
+                >
+                    Baixar PDF
+                </button>
+            </div>
+
+            <p id="ajuda-gerar-pdf" class="ajuda-campo">
+                Consulte o relatório antes de gerar o PDF.
+                Se alterar os filtros, será necessário consultar novamente.
+            </p>
+
+            <p
+                id="mensagem-relatorios"
+                role="status"
+                aria-live="polite"
+            ></p>
+        </form>
+
+        <!-- PRÉVIA DOS RESULTADOS -->
+        <section
+            id="resultado-relatorio"
+            class="resultado-relatorio oculto"
+            aria-labelledby="resultado-relatorio-titulo"
+            aria-busy="false"
+            hidden
+        >
+            <header class="cabecalho-resultado-relatorio">
+                <div>
+                    <span class="etiqueta">Prévia</span>
+
+                    <h2 id="resultado-relatorio-titulo">
+                        Resultado da consulta
+                    </h2>
+
+                    <p id="resultado-relatorio-contexto"></p>
+                </div>
+
+                <span
+                    id="resultado-relatorio-quantidade"
+                    aria-live="polite"
+                ></span>
+            </header>
+
+            <div
+                id="resultado-filtros-aplicados"
+                class="filtros-aplicados-relatorio"
+                aria-label="Filtros aplicados"
+            ></div>
+
+            <p
+                id="aviso-resultado-desatualizado"
+                class="aviso-relatorio oculto"
+                role="status"
+                hidden
+            >
+                Os filtros foram alterados. Consulte novamente para
+                atualizar os resultados e liberar a geração do PDF.
+            </p>
+
+            <div
+                id="resultado-indicadores"
+                class="indicadores-relatorio"
+                aria-label="Indicadores do relatório"
+            ></div>
+
+            <p
+                id="resultado-notas"
+                class="notas-relatorio"
+            ></p>
+
+            <div
+                class="tabela-responsiva"
+                tabindex="0"
+                role="region"
+                aria-label="Tabela de resultados"
+            >
+                <table class="tabela-dados">
+                    <caption id="resultado-tabela-legenda">
+                        Dados encontrados para os filtros selecionados
+                    </caption>
+
+                    <thead id="resultado-tabela-cabecalho"></thead>
+
+                    <tbody id="resultado-tabela-corpo"></tbody>
+                </table>
+            </div>
+
+            <p
+                id="resultado-vazio"
+                class="estado-listagem oculto"
+                hidden
+            >
+                Nenhum registro encontrado para os filtros selecionados.
+            </p>
+
+            <nav
+                id="paginacao-relatorio"
+                class="paginacao-relatorio oculto"
+                aria-label="Paginação dos resultados"
+                hidden
+            >
+                <button
+                    type="button"
+                    id="botao-pagina-anterior"
+                    disabled
+                >
+                    Anterior
+                </button>
+
+                <span
+                    id="resultado-pagina-atual"
+                    aria-live="polite"
+                ></span>
+
+                <button
+                    type="button"
+                    id="botao-proxima-pagina"
+                    disabled
+                >
+                    Próxima
+                </button>
+            </nav>
+
+            <p class="ajuda-campo">
+                A paginação organiza apenas a prévia na tela.
+                O PDF deverá incluir todos os resultados autorizados
+                correspondentes aos filtros, não apenas a página visível.
+            </p>
+        </section>
+
+        <noscript>
+            <p>
+                Ative o JavaScript para consultar relatórios.
+            </p>
+        </noscript>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/relatorios.js"></script>
+</body>
+</html>

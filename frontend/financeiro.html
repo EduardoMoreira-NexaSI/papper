@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Financeiro | Papper</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+
+    <aside class="menu-lateral">
+
+        <img
+            src="assets/02_logo_papper_transparente.png"
+            alt="Papper"
+            class="logo-menu"
+        >
+
+        <nav class="menu-navegacao">
+            <a href="dashboard.html">Visão geral</a>
+            <a href="membros.html">Membros</a>
+            <a href="atividades.html">Atividades</a>
+            <a href="frequencia.html">Frequência</a>
+
+            <a href="financeiro.html" class="ativo">
+                Financeiro
+            </a>
+
+            <a href="funcoes.html">Funções</a>
+            <a href="grupos.html">Grupos</a>
+            <a href="relatorios.html">Relatórios</a>
+        </nav>
+
+        <button type="button" id="botao-sair">
+            Sair
+        </button>
+
+    </aside>
+
+    <main class="conteudo-dashboard">
+
+        <!-- Cabeçalho -->
+
+        <header class="cabecalho-dashboard">
+
+            <div>
+                <p class="saudacao">
+                    Gestão financeira
+                </p>
+
+                <h1>Financeiro</h1>
+            </div>
+
+            <div class="usuario-logado">
+
+                <div
+                    class="usuario-avatar"
+                    id="usuario-avatar"
+                >
+                    U
+                </div>
+
+                <div>
+                    <strong id="usuario-nome">
+                        Carregando...
+                    </strong>
+
+                    <span id="usuario-perfil"></span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- Resumo financeiro -->
+
+        <section class="resumo-financeiro">
+
+            <article class="cartao-financeiro entradas">
+
+                <div class="cartao-financeiro-cabecalho">
+                    <span>Total de entradas</span>
+                    <span class="icone-financeiro">↑</span>
+                </div>
+
+                <strong id="total-entradas-financeiro">
+                    R$ 0,00
+                </strong>
+
+                <p>Dízimos, ofertas e doações</p>
+
+            </article>
+
+            <article class="cartao-financeiro saidas">
+
+                <div class="cartao-financeiro-cabecalho">
+                    <span>Total de saídas</span>
+                    <span class="icone-financeiro">↓</span>
+                </div>
+
+                <strong id="total-saidas-financeiro">
+                    R$ 0,00
+                </strong>
+
+                <p>Despesas registradas</p>
+
+            </article>
+
+            <article class="cartao-financeiro saldo">
+
+                <div class="cartao-financeiro-cabecalho">
+                    <span>Saldo atual</span>
+                    <span class="icone-financeiro">R$</span>
+                </div>
+
+                <strong id="saldo-financeiro">
+                    R$ 0,00
+                </strong>
+
+                <p>Entradas menos saídas</p>
+
+            </article>
+
+            <article class="cartao-financeiro movimentacoes">
+
+                <div class="cartao-financeiro-cabecalho">
+                    <span>Movimentações</span>
+                    <span class="icone-financeiro">#</span>
+                </div>
+
+                <strong id="total-movimentacoes-financeiro">
+                    0
+                </strong>
+
+                <p>Registros no período</p>
+
+            </article>
+
+        </section>
+
+        <!-- Totais por categoria -->
+
+        <section class="resumo-categorias-financeiras">
+
+            <article class="cartao-categoria-financeira">
+                <span>Dízimos</span>
+
+                <strong id="total-dizimos-financeiro">
+                    R$ 0,00
+                </strong>
+            </article>
+
+            <article class="cartao-categoria-financeira">
+                <span>Ofertas</span>
+
+                <strong id="total-ofertas-financeiro">
+                    R$ 0,00
+                </strong>
+            </article>
+
+            <article class="cartao-categoria-financeira">
+                <span>Doações</span>
+
+                <strong id="total-doacoes-financeiro">
+                    R$ 0,00
+                </strong>
+            </article>
+
+        </section>
+
+        <!-- Ações rápidas -->
+
+        <section class="acoes-rapidas-financeiro">
+
+            <div class="acoes-rapidas-cabecalho">
+                <div>
+                    <span class="etiqueta">
+                        Ações rápidas
+                    </span>
+
+                    <h2>Registrar movimentação</h2>
+
+                    <p>
+                        Escolha o tipo de lançamento financeiro.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grade-acoes-financeiro">
+
+                <button
+                    type="button"
+                    id="botao-registrar-dizimo"
+                    class="acao-financeira acao-dizimo"
+                    data-tipo="entrada"
+                    data-categoria="dizimo"
+                >
+                    <span class="acao-financeira-icone">
+                        D
+                    </span>
+
+                    <span class="acao-financeira-texto">
+                        <strong>Registrar dízimo</strong>
+                        <small>Membro obrigatório</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-registrar-oferta"
+                    class="acao-financeira acao-oferta"
+                    data-tipo="entrada"
+                    data-categoria="oferta"
+                >
+                    <span class="acao-financeira-icone">
+                        O
+                    </span>
+
+                    <span class="acao-financeira-texto">
+                        <strong>Registrar oferta</strong>
+                        <small>Membro opcional</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-registrar-despesa"
+                    class="acao-financeira acao-despesa"
+                    data-tipo="saida"
+                    data-categoria="despesa"
+                >
+                    <span class="acao-financeira-icone">
+                        ↓
+                    </span>
+
+                    <span class="acao-financeira-texto">
+                        <strong>Registrar despesa</strong>
+                        <small>Permite anexar nota fiscal</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-nova-movimentacao"
+                    class="acao-financeira acao-outra"
+                    data-tipo=""
+                    data-categoria=""
+                >
+                    <span class="acao-financeira-icone">
+                        +
+                    </span>
+
+                    <span class="acao-financeira-texto">
+                        <strong>Outra movimentação</strong>
+                        <small>Entrada ou saída personalizada</small>
+                    </span>
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- Formulário -->
+
+        <section
+            id="formulario-movimentacao-container"
+            class="formulario-painel oculto"
+        >
+
+            <div class="titulo-formulario">
+
+                <div>
+                    <span class="etiqueta">
+                        Financeiro
+                    </span>
+
+                    <h2 id="titulo-formulario-movimentacao">
+                        Nova movimentação
+                    </h2>
+
+                    <p id="descricao-formulario-movimentacao">
+                        Preencha os dados do lançamento.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-fechar-formulario-movimentacao"
+                    class="botao-fechar-formulario"
+                    aria-label="Fechar formulário"
+                    title="Fechar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <form id="form-movimentacao">
+
+                <div class="grade-formulario">
+
+                    <div class="campo">
+
+                        <label for="movimentacao-tipo">
+                            Tipo
+                        </label>
+
+                        <select
+                            id="movimentacao-tipo"
+                            required
+                        >
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="entrada">
+                                Entrada
+                            </option>
+
+                            <option value="saida">
+                                Saída
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="movimentacao-categoria">
+                            Categoria
+                        </label>
+
+                        <select
+                            id="movimentacao-categoria"
+                            required
+                        >
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="dizimo">
+                                Dízimo
+                            </option>
+
+                            <option value="oferta">
+                                Oferta
+                            </option>
+
+                            <option value="doacao">
+                                Doação
+                            </option>
+
+                            <option value="despesa">
+                                Despesa
+                            </option>
+
+                            <option value="outro">
+                                Outro
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="movimentacao-valor">
+                            Valor
+                        </label>
+
+                        <input
+                            type="number"
+                            id="movimentacao-valor"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="0,00"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="movimentacao-data">
+                            Data e horário
+                        </label>
+
+                        <input
+                            type="datetime-local"
+                            id="movimentacao-data"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="movimentacao-pagamento">
+                            Forma de pagamento
+                        </label>
+
+                        <select id="movimentacao-pagamento">
+
+                            <option value="">
+                                Não informada
+                            </option>
+
+                            <option value="dinheiro">
+                                Dinheiro
+                            </option>
+
+                            <option value="pix">
+                                PIX
+                            </option>
+
+                            <option value="cartao_credito">
+                                Cartão de crédito
+                            </option>
+
+                            <option value="cartao_debito">
+                                Cartão de débito
+                            </option>
+
+                            <option value="transferencia">
+                                Transferência
+                            </option>
+
+                            <option value="boleto">
+                                Boleto
+                            </option>
+
+                            <option value="outro">
+                                Outro
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="movimentacao-atividade">
+                            Atividade relacionada
+                        </label>
+
+                        <select id="movimentacao-atividade">
+                            <option value="">
+                                Nenhuma atividade
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <!-- Busca de membro -->
+
+                    <div
+                        class="campo campo-largo"
+                        id="grupo-membro-movimentacao"
+                    >
+
+                        <div class="campo-titulo-membro">
+
+                            <label for="movimentacao-busca-membro">
+                                Membro relacionado
+                                <span
+                                    id="indicador-membro-obrigatorio"
+                                    class="indicador-obrigatorio oculto"
+                                >
+                                    Obrigatório para dízimo
+                                </span>
+                            </label>
+
+                            <small id="ajuda-membro-movimentacao">
+                                Pesquise pelo nome ou CPF.
+                            </small>
+
+                        </div>
+
+                        <input
+                            type="search"
+                            id="movimentacao-busca-membro"
+                            placeholder="Digite o nome ou CPF do membro"
+                            autocomplete="off"
+                        >
+
+                        <select id="movimentacao-membro">
+                            <option value="">
+                                Nenhum membro selecionado
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="campo campo-largo">
+
+                        <label for="movimentacao-descricao">
+                            Descrição
+                        </label>
+
+                        <textarea
+                            id="movimentacao-descricao"
+                            rows="4"
+                            maxlength="250"
+                            placeholder="Descreva a movimentação"
+                        ></textarea>
+
+                    </div>
+
+                    <!-- Anexo -->
+
+                    <div
+                        class="campo campo-largo"
+                        id="grupo-anexo-movimentacao"
+                    >
+
+                        <label for="movimentacao-anexo">
+                            Nota fiscal ou comprovante
+                        </label>
+
+                        <div class="campo-anexo-financeiro">
+
+                            <input
+                                type="file"
+                                id="movimentacao-anexo"
+                                accept=".pdf,.png,.jpg,.jpeg"
+                            >
+
+                            <label
+                                for="movimentacao-anexo"
+                                class="seletor-arquivo-financeiro"
+                            >
+                                <span class="icone-anexo">
+                                    ↑
+                                </span>
+
+                                <span>
+                                    <strong>
+                                        Selecionar arquivo
+                                    </strong>
+
+                                    <small>
+                                        PDF, PNG ou JPG
+                                    </small>
+                                </span>
+                            </label>
+
+                            <div
+                                id="arquivo-selecionado-financeiro"
+                                class="arquivo-selecionado-financeiro oculto"
+                            >
+                                <div>
+                                    <strong id="nome-arquivo-financeiro">
+                                        Arquivo
+                                    </strong>
+
+                                    <small id="tamanho-arquivo-financeiro">
+                                        0 KB
+                                    </small>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="botao-remover-anexo-financeiro"
+                                    aria-label="Remover anexo"
+                                >
+                                    Remover
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <small class="ajuda-campo">
+                            Recomendado para despesas. Tamanho máximo:
+                            5 MB.
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="acoes-formulario">
+
+                    <button
+                        type="button"
+                        id="botao-cancelar-movimentacao"
+                        class="botao-cancelar-formulario"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="botao-salvar-movimentacao"
+                        class="botao-salvar-formulario"
+                    >
+                        Salvar movimentação
+                    </button>
+
+                </div>
+
+                <p id="mensagem-formulario-movimentacao"></p>
+
+            </form>
+
+        </section>
+
+        <!-- Filtros -->
+
+        <section class="painel-filtros-financeiro">
+
+            <div class="painel-filtros-cabecalho">
+
+                <div>
+                    <span class="etiqueta">
+                        Consulta
+                    </span>
+
+                    <h2>Filtrar movimentações</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="botao-limpar-filtros-financeiro"
+                    class="botao-secundario"
+                >
+                    Limpar filtros
+                </button>
+
+            </div>
+
+            <form id="form-filtros-financeiro">
+
+                <div class="grade-filtros-financeiro">
+
+                    <div class="campo">
+
+                        <label for="filtro-financeiro-data-inicio">
+                            Data inicial
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtro-financeiro-data-inicio"
+                        >
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="filtro-financeiro-data-fim">
+                            Data final
+                        </label>
+
+                        <input
+                            type="date"
+                            id="filtro-financeiro-data-fim"
+                        >
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="filtro-financeiro-tipo">
+                            Tipo
+                        </label>
+
+                        <select id="filtro-financeiro-tipo">
+
+                            <option value="">Todos</option>
+
+                            <option value="entrada">
+                                Entradas
+                            </option>
+
+                            <option value="saida">
+                                Saídas
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="campo">
+
+                        <label for="filtro-financeiro-categoria">
+                            Categoria
+                        </label>
+
+                        <select id="filtro-financeiro-categoria">
+
+                            <option value="">Todas</option>
+                            <option value="dizimo">Dízimo</option>
+                            <option value="oferta">Oferta</option>
+                            <option value="doacao">Doação</option>
+                            <option value="despesa">Despesa</option>
+                            <option value="outro">Outro</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="acoes-filtros-financeiro">
+
+                    <button
+                        type="submit"
+                        id="botao-aplicar-filtros-financeiro"
+                    >
+                        Aplicar filtros
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- Pesquisa -->
+
+        <section class="barra-acoes barra-acoes-financeiro">
+
+            <div class="campo-pesquisa">
+
+                <label for="pesquisa-movimentacao">
+                    Pesquisar movimentação
+                </label>
+
+                <input
+                    type="search"
+                    id="pesquisa-movimentacao"
+                    placeholder="Descrição, categoria ou pagamento"
+                >
+
+            </div>
+
+        </section>
+
+        <!-- Tabela -->
+
+        <section class="tabela-container">
+
+            <div class="tabela-cabecalho">
+
+                <div>
+                    <h2>Movimentações financeiras</h2>
+
+                    <p id="quantidade-movimentacoes">
+                        Carregando...
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="tabela-responsiva">
+
+                <table class="tabela-dados tabela-financeiro">
+
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Pagamento</th>
+                            <th>Comprovante</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="corpo-tabela-financeiro">
+
+                        <tr>
+                            <td colspan="7">
+                                Carregando movimentações...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <p id="mensagem-pagina-financeiro"></p>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/financeiro.js"></script>
+
+</body>
+</html>

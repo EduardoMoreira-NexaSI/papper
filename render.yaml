@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: papper-igrejas
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SETUP_TOKEN
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "120"
+      - key: MASTER_USERNAME
+        value: "useradm"
+      - key: MASTER_EMAIL
+        value: "admin@papperteste.com"
+      - key: MASTER_PASSWORD
+        sync: false
+      - key: SEED_TEST_USERS
+        value: "true"
+      - key: TEST_USER_PASSWORD
+        sync: false
+      - key: TEST_CHURCH_NAME
+        value: "Igreja de Teste Papper"

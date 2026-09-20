@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-Br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Papper</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="pagina-dashboard">
+  <aside class="menu-lateral">
+    <img
+      src="assets/02_logo_papper_transparente.png"
+      alt="Papper"
+      class="logo-menu"> 
+
+    <nav class="menu-navegacao">
+      <a href="dashboard.html" class="ativo">Visão geral</a>
+      <a href="membros.html">Membros</a>
+      <a href="atividades.html">Atividades</a>
+      <a href="frequencia.html">Frequência</a>
+      <a href="financeiro.html">Financeiro</a>
+      <a href="funcoes.html">Funçoes</a>
+      <a href="grupos.html">Grupos</a>
+      <a href="relatorios.html">Relatórios</a>
+    </nav>
+
+    <button type="button" id="botao-sair">
+      Sair
+    </button>
+  </aside>
+
+  <main class="conteudo-dashboard">
+    <header class="cabecalho-dashboard">
+      
+      <div>
+        <p class="saudacao">Painel Gerencial Pastoral</p>
+        <h1>Visão geral</h1>
+      </div>
+
+      <div class="usuario-logado">
+        <div class="usuario-avatar" id="usuario-avatar">u</div>
+      
+
+        <div>
+          <strong id="usuario-nome">Carregando... </strong>
+          <span id="usuario-perfil"></span>
+        </div>
+      </div>
+
+    </header>
+
+  <section class="cards-resumo">
+    <article class="card-resumo">
+      <span>Membros ativos</span>
+      <strong id="total-membros">—</strong>
+      <small>Cadastrados na igreja</small>
+    </article>
+
+    <article class="card-resumo">
+      <span>Próximas atividades</span>
+      <strong id="total-atividades">—</strong>
+      <small>Cultos, reuniões e eventos</small>
+    </article>
+
+    <article class="card-resumo">
+      <span>Entradas</span>
+      <strong id="total-entradas">R$ —</strong>
+      <small>Dízimos, ofertas e doações</small>
+    </article>
+
+    <article class="card-resumo destaque">
+      <span>Saldo atual</span>
+      <strong id="saldo-atual">R$ —</strong>
+      <small>Resumo financeiro</small>
+    </article>
+  </section>
+
+  <section class="painel-boas-vindas">
+    <div>
+      <span class="etiqueta">Papper</span>
+      <h2>Bem-vindo ao painel da sua igreja</h2>
+
+      <p>
+        Acompanhe membros, frequências, atividades  e movimentações financeiras em um só lugar.
+      </p>
+    </div>
+  </section>
+
+  <p id="mensagem-dashboard"></p>
+
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+
+</body>
+</html>
