@@ -5,7 +5,7 @@ import os
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database import URL_BANCO, SessionLocal
+from database import SessionLocal
 from models import IgrejaBanco, UsuarioBanco
 from seguranca import criar_hash_senha
 
@@ -17,21 +17,20 @@ def _bool_env(nome: str, padrao: bool = False) -> bool:
     return valor.strip().lower() in {"1", "true", "sim", "yes", "on"}
 
 
-def _senha_master() -> str:
-    senha = os.getenv("MASTER_PASSWORD", "").strip()
-    if senha:
-        return senha
+def _senha_obrigatoria(nome_variavel: str) -> str:
+    senha = os.getenv(nome_variavel, "").strip()
 
-    if URL_BANCO.startswith("sqlite"):
-        return "PapperAdm@2026"
+    if not senha:
+        raise RuntimeError(
+            f"{nome_variavel} precisa ser configurada nas variáveis de ambiente."
+        )
 
-    raise RuntimeError(
-        "MASTER_PASSWORD precisa ser configurada no ambiente de hospedagem."
-    )
+    if len(senha) < 8:
+        raise RuntimeError(
+            f"{nome_variavel} deve possuir pelo menos 8 caracteres."
+        )
 
-
-def _senha_testes() -> str:
-    return os.getenv("TEST_USER_PASSWORD", "123456789").strip() or "123456789"
+    return senha
 
 
 def garantir_igreja_teste(banco: Session) -> IgrejaBanco:
@@ -103,14 +102,14 @@ def semear_dados_iniciais() -> dict[str, int]:
             nome="Administrador Master",
             username=os.getenv("MASTER_USERNAME", "useradm"),
             email=os.getenv("MASTER_EMAIL", "admin@papperteste.com"),
-            senha=_senha_master(),
+            senha=_senha_obrigatoria("MASTER_PASSWORD"),
             perfil="master",
             igreja_id=igreja.id,
         )
 
         criar_testes = _bool_env("SEED_TEST_USERS", True)
         if criar_testes:
-            senha_teste = _senha_testes()
+            senha_teste = _senha_obrigatoria("TEST_USER_PASSWORD")
             for numero in range(1, 11):
                 username = f"user{numero:02d}"
                 garantir_usuario(
