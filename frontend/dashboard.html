@@ -23,8 +23,8 @@
     <button type="button" id="botao-sair">Sair</button>
   </aside>
 
-  <main class="conteudo-dashboard dashboard-v2">
-    <header class="cabecalho-dashboard">
+  <main class="conteudo-dashboard dashboard-v3">
+    <header class="cabecalho-dashboard cabecalho-dashboard-v3">
       <div class="marca-igreja-dashboard">
         <div class="logo-igreja-wrap">
           <img id="logo-igreja" class="logo-igreja oculto" alt="Logo da igreja">
@@ -50,18 +50,19 @@
       </div>
     </header>
 
-    <section class="cards-resumo cards-resumo-v2">
+    <section class="cards-resumo cards-resumo-v3">
       <article class="card-resumo"><span>Membros ativos</span><strong id="total-membros">—</strong><small>Total atual</small></article>
       <article class="card-resumo"><span>Novos no mês</span><strong id="membros-novos-mes">—</strong><small>Cadastros neste mês</small></article>
-      <article class="card-resumo"><span>Próximas atividades</span><strong id="total-atividades">—</strong><small>Próximos 45 dias</small></article>
+      <article class="card-resumo"><span>Próximas atividades</span><strong id="total-atividades">—</strong><small>Agenda futura</small></article>
+      <article class="card-resumo"><span>Lembretes ativos</span><strong id="total-lembretes">—</strong><small>Somente seus lembretes</small></article>
       <article class="card-resumo"><span>Visitas agendadas</span><strong id="visitas-agendadas">—</strong><small>No mês atual</small></article>
       <article class="card-resumo"><span>Visitas realizadas</span><strong id="visitas-realizadas">—</strong><small>No mês atual</small></article>
-      <article class="card-resumo"><span>Entradas do mês</span><strong id="total-entradas">R$ —</strong><small>Movimentações registradas</small></article>
-      <article class="card-resumo"><span>Saídas do mês</span><strong id="total-saidas">R$ —</strong><small>Movimentações registradas</small></article>
-      <article class="card-resumo destaque"><span>Resultado do mês</span><strong id="saldo-atual">R$ —</strong><small>Entradas menos saídas</small></article>
+      <article class="card-resumo financeiro-dashboard"><span>Entradas do mês</span><strong id="total-entradas">R$ —</strong><small>Movimentações registradas</small></article>
+      <article class="card-resumo financeiro-dashboard"><span>Saídas do mês</span><strong id="total-saidas">R$ —</strong><small>Movimentações registradas</small></article>
+      <article class="card-resumo destaque financeiro-dashboard"><span>Resultado do mês</span><strong id="saldo-atual">R$ —</strong><small>Entradas menos saídas</small></article>
     </section>
 
-    <section class="grade-dashboard-v2">
+    <section class="grade-dashboard-v3 grade-graficos-dashboard">
       <article class="painel-dashboard painel-grafico">
         <div class="painel-dashboard-cabecalho">
           <div><span class="etiqueta">Financeiro</span><h2>Fluxo dos últimos 30 dias</h2></div>
@@ -70,30 +71,79 @@
         <div id="grafico-fluxo" class="grafico-fluxo" aria-label="Gráfico de entradas e saídas"></div>
       </article>
 
-      <article class="painel-dashboard painel-caixa">
+      <article class="painel-dashboard painel-grafico">
+        <div class="painel-dashboard-cabecalho">
+          <div><span class="etiqueta">Membros</span><h2>Novos membros no mês</h2></div>
+          <small class="texto-secundario">Cadastros por faixa de dias</small>
+        </div>
+        <div id="grafico-novos-membros" class="grafico-membros" aria-label="Gráfico de novos membros por mês"></div>
+      </article>
+    </section>
+
+    <section class="grade-dashboard-v3 grade-calendario-lembretes">
+      <article class="painel-dashboard painel-calendario">
+        <div class="painel-dashboard-cabecalho calendario-cabecalho">
+          <div><span class="etiqueta">Agenda</span><h2>Calendário de atividades</h2></div>
+          <div class="controles-calendario">
+            <button type="button" id="calendario-anterior" aria-label="Mês anterior">‹</button>
+            <strong id="calendario-titulo">—</strong>
+            <button type="button" id="calendario-proximo" aria-label="Próximo mês">›</button>
+          </div>
+        </div>
+        <div class="calendario-semana" aria-hidden="true">
+          <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+        </div>
+        <div id="calendario-grid" class="calendario-grid"></div>
+        <p class="nota-dashboard">Clique em uma atividade para abrir a agenda completa.</p>
+      </article>
+
+      <article class="painel-dashboard painel-lembretes">
+        <div class="painel-dashboard-cabecalho">
+          <div><span class="etiqueta">Pessoal</span><h2>Meus lembretes</h2></div>
+          <button type="button" id="botao-novo-lembrete" class="botao-acao-dashboard">+ Novo</button>
+        </div>
+
+        <form id="form-lembrete" class="form-lembrete-dashboard oculto">
+          <label>
+            <span>Título</span>
+            <input type="text" id="lembrete-titulo" minlength="2" maxlength="150" required placeholder="Ex.: Conferir relatório financeiro">
+          </label>
+          <label>
+            <span>Data e hora</span>
+            <input type="datetime-local" id="lembrete-data" required>
+          </label>
+          <label class="campo-lembrete-descricao">
+            <span>Observação</span>
+            <textarea id="lembrete-descricao" maxlength="1000" rows="2" placeholder="Opcional"></textarea>
+          </label>
+          <div class="acoes-form-lembrete">
+            <button type="submit" class="botao-acao-dashboard">Salvar lembrete</button>
+            <button type="button" id="cancelar-lembrete" class="botao-secundario-dashboard">Cancelar</button>
+          </div>
+        </form>
+
+        <div id="lista-lembretes" class="lista-lembretes-dashboard"></div>
+      </article>
+    </section>
+
+    <section class="grade-dashboard-v3">
+      <article class="painel-dashboard painel-caixa financeiro-dashboard">
         <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Custódia</span><h2>Caixa e cofre</h2></div></div>
         <div class="grade-caixa-cofre">
           <div><span>Caixa físico estimado</span><strong id="caixa-fisico">R$ —</strong></div>
           <div><span>Valor em cofre</span><strong id="cofre-estimado">R$ —</strong></div>
           <div><span>Aguardando visto pastoral</span><strong id="envelopes-pendentes">R$ —</strong></div>
         </div>
-        <small class="texto-secundario">Estimativa baseada em lançamentos marcados como dinheiro e depósitos em envelope.</small>
-      </article>
-    </section>
-
-    <section class="grade-dashboard-v2">
-      <article class="painel-dashboard">
-        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Agenda</span><h2>Calendário</h2></div></div>
-        <div id="calendario-atividades" class="lista-dashboard"></div>
+        <small class="texto-secundario">Estimativa baseada em lançamentos em dinheiro e depósitos por envelope.</small>
       </article>
 
       <article class="painel-dashboard">
-        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Membros</span><h2>Novos no mês</h2></div></div>
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Membros</span><h2>Cadastros recentes</h2></div></div>
         <div id="lista-novos-membros" class="lista-dashboard"></div>
       </article>
     </section>
 
-    <section class="grade-dashboard-v2">
+    <section class="grade-dashboard-v3">
       <article class="painel-dashboard">
         <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Pastoral</span><h2>Visitas</h2></div></div>
         <div class="tabela-responsiva">
@@ -104,7 +154,7 @@
         </div>
       </article>
 
-      <article class="painel-dashboard" id="painel-movimentacoes-recentes">
+      <article class="painel-dashboard financeiro-dashboard" id="painel-movimentacoes-recentes">
         <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Financeiro</span><h2>Movimentações recentes</h2></div></div>
         <div class="tabela-responsiva">
           <table class="tabela-dados tabela-dashboard-compacta">
@@ -115,7 +165,16 @@
       </article>
     </section>
 
-    <p id="mensagem-dashboard"></p>
+    <p id="mensagem-dashboard" class="mensagem-dashboard-v3" role="status"></p>
+
+    <footer class="rodape-dashboard-v3">
+      <div>
+        <span class="etiqueta">Papper</span>
+        <h2>Bem-vindo ao painel da sua igreja</h2>
+        <p>Acompanhe membros, atividades, visitas, lembretes, frequência e movimentações financeiras em um só lugar.</p>
+      </div>
+      <small>Papper Gestão v3 • Ambiente de testes</small>
+    </footer>
   </main>
 
   <script src="js/api.js"></script>

@@ -65,3 +65,93 @@
   .marca-igreja-dashboard { align-items: flex-start; }
   .botao-upload-logo { width: 100%; text-align: center; }
 }
+
+/* =========================================================
+   PAPPER V3 — VISÃO GERAL OPERACIONAL
+========================================================= */
+.dashboard-v3 { display: flex; flex-direction: column; gap: 24px; }
+.cabecalho-dashboard-v3 { margin-bottom: 0; }
+.cards-resumo-v3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grade-dashboard-v3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.grade-graficos-dashboard { grid-template-columns: minmax(0, 1.35fr) minmax(340px, .8fr); }
+.grade-calendario-lembretes { grid-template-columns: minmax(0, 1.55fr) minmax(330px, .7fr); }
+
+.grafico-membros { height: 240px; display: flex; align-items: stretch; gap: 12px; padding: 12px 4px 0; border-bottom: 1px solid #dce4ea; }
+.coluna-membros { flex: 1; min-width: 44px; display: grid; grid-template-rows: 24px 1fr 28px; gap: 5px; text-align: center; color: #617385; }
+.coluna-membros strong { color: #102a43; font-size: .9rem; }
+.barra-membros-wrap { display: flex; align-items: end; justify-content: center; height: 170px; background: linear-gradient(to top, rgba(31,95,139,.03), rgba(31,95,139,0)); border-radius: 8px 8px 0 0; overflow: hidden; }
+.barra-membros-wrap span { width: 58%; min-height: 3px; background: #1f5f8b; border-radius: 8px 8px 2px 2px; }
+.coluna-membros small { font-size: .72rem; white-space: nowrap; }
+
+.calendario-cabecalho { align-items: center; }
+.controles-calendario { display: grid; grid-template-columns: 36px minmax(120px, auto) 36px; align-items: center; gap: 8px; }
+.controles-calendario button { width: 36px; height: 36px; border: 1px solid #d8e2ea; border-radius: 9px; background: #fff; color: #102a43; font-size: 1.35rem; cursor: pointer; }
+.controles-calendario button:hover { background: #eef4f8; }
+.controles-calendario strong { text-align: center; color: #102a43; font-size: .92rem; text-transform: capitalize; }
+.calendario-semana, .calendario-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.calendario-semana { border: 1px solid #e1e8ee; border-bottom: 0; border-radius: 12px 12px 0 0; overflow: hidden; }
+.calendario-semana span { padding: 9px 5px; text-align: center; font-size: .72rem; font-weight: 800; color: #667582; background: #f6f9fb; }
+.calendario-grid { border-top: 1px solid #e1e8ee; border-left: 1px solid #e1e8ee; }
+.dia-calendario { min-height: 112px; padding: 8px; background: #fff; border-right: 1px solid #e1e8ee; border-bottom: 1px solid #e1e8ee; overflow: hidden; }
+.dia-calendario.fora-mes { background: #fafbfd; }
+.dia-calendario.hoje { box-shadow: inset 0 0 0 2px #d4a63a; background: #fffbef; }
+.numero-dia { width: 26px; height: 26px; display: grid; place-items: center; margin-bottom: 5px; color: #102a43; font-size: .78rem; font-weight: 800; border-radius: 50%; }
+.dia-calendario.hoje .numero-dia { background: #d4a63a; }
+.evento-calendario { display: block; margin: 4px 0; padding: 5px 6px; overflow: hidden; color: #16496c; background: #edf6fc; border-left: 3px solid #1f5f8b; border-radius: 5px; font-size: .68rem; line-height: 1.2; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.evento-calendario span { margin-right: 4px; font-weight: 800; }
+.evento-calendario.tipo-visita { color: #75570d; background: #fff8df; border-left-color: #d4a63a; }
+.evento-calendario.tipo-culto { color: #275a3e; background: #edf8f1; border-left-color: #3a875b; }
+.mais-eventos { display: block; margin-top: 4px; color: #718096; font-size: .65rem; }
+.nota-dashboard { margin-top: 10px; color: #718096; font-size: .74rem; }
+
+.painel-lembretes { display: flex; flex-direction: column; min-height: 100%; }
+.botao-acao-dashboard, .botao-secundario-dashboard { border: 0; border-radius: 9px; padding: 9px 12px; font-weight: 800; cursor: pointer; }
+.botao-acao-dashboard { color: #fff; background: #1f5f8b; }
+.botao-acao-dashboard:hover { background: #174f74; }
+.botao-secundario-dashboard { color: #102a43; background: #eef3f7; }
+.form-lembrete-dashboard { display: grid; gap: 10px; margin-bottom: 16px; padding: 14px; background: #f7f9fb; border: 1px solid #e1e8ee; border-radius: 12px; }
+.form-lembrete-dashboard label { display: grid; gap: 5px; color: #334e68; font-size: .78rem; font-weight: 700; }
+.form-lembrete-dashboard input, .form-lembrete-dashboard textarea { width: 100%; border: 1px solid #d5e0e8; border-radius: 8px; padding: 9px 10px; color: #243b53; background: #fff; font: inherit; }
+.acoes-form-lembrete { display: flex; gap: 8px; flex-wrap: wrap; }
+.lista-lembretes-dashboard { display: flex; flex-direction: column; gap: 8px; }
+.item-lembrete { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #e5ebf0; border-radius: 11px; background: #fff; }
+.item-lembrete > div { min-width: 0; }
+.item-lembrete strong, .item-lembrete time, .item-lembrete p { display: block; }
+.item-lembrete strong { color: #102a43; margin-bottom: 4px; }
+.item-lembrete time { color: #627d98; font-size: .75rem; }
+.item-lembrete p { margin-top: 5px; color: #52697d; font-size: .76rem; line-height: 1.4; }
+.item-lembrete.lembrete-atrasado { border-color: #efc2bd; background: #fff8f7; }
+.item-lembrete.lembrete-atrasado time { color: #a63e35; font-weight: 800; }
+.botao-desativar-lembrete { flex: 0 0 auto; border: 1px solid #d6e0e7; border-radius: 8px; padding: 6px 8px; color: #52697d; background: #fff; font-size: .7rem; cursor: pointer; }
+.botao-desativar-lembrete:hover { color: #a63e35; border-color: #efc2bd; }
+
+.mensagem-dashboard-v3 { min-height: 22px; color: #a63e35; font-size: .84rem; }
+.mensagem-dashboard-v3.sucesso { color: #237a43; }
+.rodape-dashboard-v3 { margin-top: 4px; padding: 28px 30px; display: flex; justify-content: space-between; align-items: end; gap: 24px; color: #fff; background: linear-gradient(115deg, #102a43, #1f5f8b); border-radius: 18px; box-shadow: 0 10px 30px rgba(16,42,67,.12); }
+.rodape-dashboard-v3 .etiqueta { display: inline-flex; margin-bottom: 10px; color: #102a43; background: #d4a63a; }
+.rodape-dashboard-v3 h2 { margin-bottom: 7px; font-size: 1.25rem; }
+.rodape-dashboard-v3 p { max-width: 720px; color: #dceefb; line-height: 1.5; }
+.rodape-dashboard-v3 small { white-space: nowrap; color: #dceefb; opacity: .9; }
+
+@media (max-width: 1250px) {
+  .cards-resumo-v3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grade-graficos-dashboard, .grade-calendario-lembretes { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .grade-dashboard-v3 { grid-template-columns: 1fr; }
+  .dia-calendario { min-height: 92px; padding: 6px; }
+  .evento-calendario { font-size: .62rem; }
+  .rodape-dashboard-v3 { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 700px) {
+  .cards-resumo-v3 { grid-template-columns: 1fr; }
+  .calendario-semana span { font-size: .62rem; }
+  .dia-calendario { min-height: 70px; }
+  .evento-calendario { padding: 3px 4px; }
+  .evento-calendario span { display: none; }
+  .controles-calendario { grid-template-columns: 32px 1fr 32px; width: 100%; }
+  .calendario-cabecalho { flex-direction: column; }
+  .item-lembrete { flex-direction: column; }
+}

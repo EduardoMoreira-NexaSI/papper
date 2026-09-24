@@ -149,4 +149,33 @@ function prepararLinkMaster() {
     menu.appendChild(link);
 }
 
-document.addEventListener("DOMContentLoaded", prepararLinkMaster);
+function prepararLinkFiliais() {
+    const perfil = sessionStorage.getItem("perfil");
+
+    if (!["master", "pastor"].includes(perfil)) {
+        return;
+    }
+
+    const menu = document.querySelector(".menu-navegacao");
+
+    if (!menu || menu.querySelector('a[href="filiais.html"]')) {
+        return;
+    }
+
+    const link = document.createElement("a");
+    link.href = "filiais.html";
+    link.textContent = "Filiais";
+
+    const relatorios = menu.querySelector('a[href="relatorios.html"]');
+
+    if (relatorios) {
+        menu.insertBefore(link, relatorios);
+    } else {
+        menu.appendChild(link);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    prepararLinkFiliais();
+    prepararLinkMaster();
+});

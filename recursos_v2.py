@@ -23,6 +23,7 @@ from models import (
     AtividadeBanco,
     DepositoEnvelopeBanco,
     IgrejaBanco,
+    LembreteBanco,
     MembroBanco,
     MovimentacaoFinanceiraBanco,
     UsuarioBanco,
@@ -71,6 +72,35 @@ class AtividadeRecorrenteCriar(BaseModel):
 
 class VistoEnvelope(BaseModel):
     observacao: str | None = Field(default=None, max_length=1000)
+
+
+class LembreteCriar(BaseModel):
+    titulo: str = Field(min_length=2, max_length=150)
+    descricao: str | None = Field(default=None, max_length=1000)
+    lembrar_em: datetime
+
+
+class LembreteStatusAtualizar(BaseModel):
+    ativo: bool
+
+
+def _mes_deslocado(ano: int, mes: int, deslocamento: int) -> tuple[int, int]:
+    indice = ano * 12 + (mes - 1) + deslocamento
+    return indice // 12, indice % 12 + 1
+
+
+def _lembrete_dict(item: LembreteBanco) -> dict:
+    return {
+        "id": item.id,
+        "titulo": item.titulo,
+        "descricao": item.descricao,
+        "lembrar_em": item.lembrar_em,
+        "ativo": item.ativo,
+        "criado_em": item.criado_em,
+        "desativado_em": item.desativado_em,
+        "igreja_id": item.igreja_id,
+        "usuario_id": item.usuario_id,
+    }
 
 
 def _atividade_dict(item: AtividadeBanco) -> dict:
@@ -247,10 +277,8 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
 
         agora = datetime.now()
         inicio_mes = datetime(agora.year, agora.month, 1)
-        if agora.month == 12:
-            inicio_proximo = datetime(agora.year + 1, 1, 1)
-        else:
-            inicio_proximo = datetime(agora.year, agora.month + 1, 1)
+        ano_proximo, mes_proximo = _mes_deslocado(agora.year, agora.month, 1)
+        inicio_proximo = datetime(ano_proximo, mes_proximo, 1)
         inicio_fluxo = (agora - timedelta(days=29)).replace(hour=0, minute=0, second=0, microsecond=0)
         fim_calendario = agora + timedelta(days=45)
 
@@ -271,8 +299,38 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
             select(MembroBanco).where(
                 MembroBanco.igreja_id == igreja_id,
                 MembroBanco.criado_em >= inicio_mes,
+                MembroBanco.criado_em < inicio_proximo,
             ).order_by(MembroBanco.criado_em.desc()).limit(6)
         ).all()
+
+        # Gráfico do mês atual em faixas semanais: 1-7, 8-14, 15-21, 22-28 e 29-fim.
+        datas_membros_mes = banco.scalars(
+            select(MembroBanco.criado_em).where(
+                MembroBanco.igreja_id == igreja_id,
+                MembroBanco.criado_em.is_not(None),
+                MembroBanco.criado_em >= inicio_mes,
+                MembroBanco.criado_em < inicio_proximo,
+            )
+        ).all()
+        total_dias_mes = (inicio_proximo - timedelta(days=1)).day
+        faixas = [(1, 7), (8, 14), (15, 21), (22, 28)]
+        if total_dias_mes >= 29:
+            faixas.append((29, total_dias_mes))
+        contagem_semanas = [0 for _ in faixas]
+        for criado_em in datas_membros_mes:
+            if criado_em is None:
+                continue
+            for indice, (inicio_dia, fim_dia) in enumerate(faixas):
+                if inicio_dia <= criado_em.day <= fim_dia:
+                    contagem_semanas[indice] += 1
+                    break
+        membros_mes_grafico = [
+            {
+                "rotulo": f"{inicio_dia}-{fim_dia}",
+                "total": contagem_semanas[indice],
+            }
+            for indice, (inicio_dia, fim_dia) in enumerate(faixas)
+        ]
 
         atividades_calendario = banco.scalars(
             select(AtividadeBanco).where(
@@ -280,7 +338,7 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
                 AtividadeBanco.data_hora_inicio >= agora.replace(hour=0, minute=0, second=0, microsecond=0),
                 AtividadeBanco.data_hora_inicio <= fim_calendario,
                 AtividadeBanco.status != "cancelado",
-            ).order_by(AtividadeBanco.data_hora_inicio).limit(30)
+            ).order_by(AtividadeBanco.data_hora_inicio).limit(60)
         ).all()
         proximas = [a for a in atividades_calendario if a.data_hora_inicio >= agora][:8]
 
@@ -294,6 +352,14 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         ).all()
         visitas_realizadas = sum(1 for v in visitas_mes if v.status == "realizado")
         visitas_agendadas = sum(1 for v in visitas_mes if v.status == "agendado")
+
+        lembretes = banco.scalars(
+            select(LembreteBanco).where(
+                LembreteBanco.igreja_id == igreja_id,
+                LembreteBanco.usuario_id == usuario.id,
+                LembreteBanco.ativo.is_(True),
+            ).order_by(LembreteBanco.lembrar_em, LembreteBanco.id).limit(12)
+        ).all()
 
         financeiro_permitido = usuario.perfil in ("master", "administrador", "pastor", "tesoureiro")
         total_entradas = Decimal("0.00")
@@ -367,21 +433,28 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
             )
 
         return {
+            "versao_dashboard": "3.0",
             "igreja": {
                 "id": igreja.id,
                 "nome": igreja.nome,
                 "presidente": igreja.presidente,
+                "igreja_sede_id": igreja.igreja_sede_id,
+                "tipo_unidade": "filial" if igreja.igreja_sede_id else "sede",
+                "rotulo_lider": "Pastor responsável" if igreja.igreja_sede_id else "Pastor presidente",
                 "tem_logo": bool(igreja.logo_dados),
                 "logo_url": f"/igrejas/{igreja.id}/logo" if igreja.logo_dados else None,
             },
             "membros_ativos": membros_ativos,
             "membros_novos_mes": membros_novos,
+            "membros_mes_grafico": membros_mes_grafico,
             "novos_membros": [
                 {"id": m.id, "nome": m.nome, "contato": m.contato, "criado_em": m.criado_em}
                 for m in novos_lista
             ],
             "proximas_atividades": [_atividade_dict(a) for a in proximas],
             "calendario": [_atividade_dict(a) for a in atividades_calendario],
+            "lembretes": [_lembrete_dict(item) for item in lembretes],
+            "lembretes_pendentes": len(lembretes),
             "visitas_agendadas_mes": visitas_agendadas,
             "visitas_realizadas_mes": visitas_realizadas,
             "visitas": [_atividade_dict(v) for v in visitas_mes[:8]],
@@ -397,6 +470,99 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
                 "movimentacoes_recentes": recentes,
             },
         }
+
+    @router.get("/igrejas/{igreja_id}/dashboard/calendario")
+    def calendario_dashboard(
+        igreja_id: int,
+        ano: int,
+        mes: int,
+        banco: Session = Depends(obter_banco),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
+    ):
+        validar_igreja_do_usuario(usuario, igreja_id)
+        if ano < 2000 or ano > 2100 or mes < 1 or mes > 12:
+            raise HTTPException(422, "Mês ou ano inválido.")
+        inicio = datetime(ano, mes, 1)
+        ano_proximo, mes_proximo = _mes_deslocado(ano, mes, 1)
+        fim = datetime(ano_proximo, mes_proximo, 1)
+        atividades = banco.scalars(
+            select(AtividadeBanco).where(
+                AtividadeBanco.igreja_id == igreja_id,
+                AtividadeBanco.data_hora_inicio >= inicio,
+                AtividadeBanco.data_hora_inicio < fim,
+                AtividadeBanco.status != "cancelado",
+            ).order_by(AtividadeBanco.data_hora_inicio, AtividadeBanco.id).limit(300)
+        ).all()
+        return {
+            "ano": ano,
+            "mes": mes,
+            "atividades": [_atividade_dict(a) for a in atividades],
+        }
+
+    @router.post("/igrejas/{igreja_id}/lembretes", status_code=status.HTTP_201_CREATED)
+    def criar_lembrete(
+        igreja_id: int,
+        dados: LembreteCriar,
+        banco: Session = Depends(obter_banco),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
+    ):
+        validar_igreja_do_usuario(usuario, igreja_id)
+        if banco.get(IgrejaBanco, igreja_id) is None:
+            raise HTTPException(404, "Igreja não encontrada.")
+        item = LembreteBanco(
+            titulo=dados.titulo.strip(),
+            descricao=(dados.descricao or "").strip() or None,
+            lembrar_em=dados.lembrar_em,
+            igreja_id=igreja_id,
+            usuario_id=usuario.id,
+        )
+        banco.add(item)
+        banco.commit()
+        banco.refresh(item)
+        return _lembrete_dict(item)
+
+    @router.get("/igrejas/{igreja_id}/lembretes")
+    def listar_lembretes(
+        igreja_id: int,
+        incluir_inativos: bool = False,
+        banco: Session = Depends(obter_banco),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
+    ):
+        validar_igreja_do_usuario(usuario, igreja_id)
+        comando = select(LembreteBanco).where(
+            LembreteBanco.igreja_id == igreja_id,
+            LembreteBanco.usuario_id == usuario.id,
+        )
+        if not incluir_inativos:
+            comando = comando.where(LembreteBanco.ativo.is_(True))
+        itens = banco.scalars(
+            comando.order_by(LembreteBanco.ativo.desc(), LembreteBanco.lembrar_em, LembreteBanco.id).limit(200)
+        ).all()
+        return [_lembrete_dict(item) for item in itens]
+
+    @router.patch("/igrejas/{igreja_id}/lembretes/{lembrete_id}/status")
+    def atualizar_status_lembrete(
+        igreja_id: int,
+        lembrete_id: int,
+        dados: LembreteStatusAtualizar,
+        banco: Session = Depends(obter_banco),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
+    ):
+        validar_igreja_do_usuario(usuario, igreja_id)
+        item = banco.scalar(
+            select(LembreteBanco).where(
+                LembreteBanco.id == lembrete_id,
+                LembreteBanco.igreja_id == igreja_id,
+                LembreteBanco.usuario_id == usuario.id,
+            )
+        )
+        if item is None:
+            raise HTTPException(404, "Lembrete não encontrado.")
+        item.ativo = dados.ativo
+        item.desativado_em = None if dados.ativo else datetime.now()
+        banco.commit()
+        banco.refresh(item)
+        return _lembrete_dict(item)
 
     @router.post("/igrejas/{igreja_id}/financeiro/envelopes", status_code=status.HTTP_201_CREATED)
     async def criar_envelope(
@@ -497,15 +663,35 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
             raise HTTPException(404, "Envelope não encontrado.")
         return item
 
+    def _exigir_responsavel_unidade(
+        banco: Session,
+        usuario: UsuarioBanco,
+        igreja_id: int,
+    ) -> IgrejaBanco:
+        igreja = banco.get(IgrejaBanco, igreja_id)
+        if igreja is None:
+            raise HTTPException(404, "Igreja não encontrada.")
+        if (
+            usuario.perfil != "pastor"
+            or igreja.pastor_responsavel_id is None
+            or igreja.pastor_responsavel_id != usuario.id
+        ):
+            raise HTTPException(
+                403,
+                "Somente o pastor responsável por esta unidade pode dar o visto no envelope.",
+            )
+        return igreja
+
     @router.post("/igrejas/{igreja_id}/financeiro/envelopes/{envelope_id}/aprovar")
     def aprovar_envelope(
         igreja_id: int,
         envelope_id: int,
         dados: VistoEnvelope,
         banco: Session = Depends(obter_banco),
-        usuario: UsuarioBanco = Depends(exigir_perfis("pastor")),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
     ):
         validar_igreja_do_usuario(usuario, igreja_id)
+        _exigir_responsavel_unidade(banco, usuario, igreja_id)
         item = _buscar_envelope(banco, igreja_id, envelope_id)
         if item.status != "aguardando_visto":
             raise HTTPException(409, "Este envelope já foi analisado.")
@@ -523,9 +709,10 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         envelope_id: int,
         dados: VistoEnvelope,
         banco: Session = Depends(obter_banco),
-        usuario: UsuarioBanco = Depends(exigir_perfis("pastor")),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
     ):
         validar_igreja_do_usuario(usuario, igreja_id)
+        _exigir_responsavel_unidade(banco, usuario, igreja_id)
         item = _buscar_envelope(banco, igreja_id, envelope_id)
         if item.status != "aguardando_visto":
             raise HTTPException(409, "Este envelope já foi analisado.")
