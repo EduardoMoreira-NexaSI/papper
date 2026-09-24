@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    LargeBinary,
     Numeric,
     String,
     Table,
@@ -93,6 +94,16 @@ class IgrejaBanco(Base):
     endereco: Mapped[str] = mapped_column(
         String(250),
         nullable=False
+    )
+
+    logo_dados: Mapped[bytes | None] = mapped_column(
+        LargeBinary,
+        nullable=True
+    )
+
+    logo_mime: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
     )
 
     membros: Mapped[list["MembroBanco"]] = relationship(
@@ -195,6 +206,12 @@ class MembroBanco(Base):
         Boolean,
         default=True,
         nullable=False
+    )
+
+    criado_em: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=func.now()
     )
 
     igreja_id: Mapped[int] = mapped_column(
@@ -401,6 +418,12 @@ class AtividadeBanco(Base):
     observacoes: Mapped[str | None] = mapped_column(
         Text,
         nullable=True
+    )
+
+    serie_recorrencia_id: Mapped[str | None] = mapped_column(
+        String(36),
+        nullable=True,
+        index=True
     )
 
     igreja_id: Mapped[int] = mapped_column(
@@ -642,6 +665,101 @@ class MovimentacaoFinanceiraBanco(Base):
 
     atividade_id: Mapped[int | None] = mapped_column(
         ForeignKey("atividades.id"),
+        nullable=True
+    )
+
+
+# =========================================================
+# DEPÓSITOS EM ENVELOPE / TRANSFERÊNCIAS INTERNAS
+# =========================================================
+
+class DepositoEnvelopeBanco(Base):
+    __tablename__ = "depositos_envelope"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "igreja_id",
+            "numero",
+            name="uq_envelope_igreja_numero"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    numero: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False
+    )
+
+    valor: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False
+    )
+
+    data_deposito: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="aguardando_visto",
+        server_default="aguardando_visto"
+    )
+
+    observacao: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    visto_observacao: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    comprovante_nome: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
+
+    comprovante_mime: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
+    comprovante_dados: Mapped[bytes] = mapped_column(
+        LargeBinary,
+        nullable=False
+    )
+
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
+    )
+
+    aprovado_em: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True
+    )
+
+    igreja_id: Mapped[int] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=False
+    )
+
+    criado_por_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=False
+    )
+
+    aprovado_por_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"),
         nullable=True
     )
 

@@ -525,9 +525,11 @@
 
                             <select id="financeiro-modelo" name="financeiro_modelo">
                                 <option value="resumo">Resumo financeiro</option>
-                                <option value="extrato">Extrato de movimentações</option>
+                                <option value="extrato">Extrato detalhado de movimentações</option>
                                 <option value="fluxo">Fluxo de caixa realizado</option>
                                 <option value="categorias">Entradas e saídas por categoria</option>
+                                <option value="membro">Extrato individual de membro</option>
+                                <option value="envelopes">Depósitos em envelope / cofre</option>
                             </select>
                         </div>
 
@@ -630,8 +632,9 @@
                         O fluxo representa movimentações registradas, não
                         previsões de contas a pagar ou receber.
                         Saldo anterior e saldo acumulado dependem do histórico
-                        registrado. Com filtros de categoria ou membro,
-                        os valores representam apenas o recorte selecionado.
+                        registrado. Para o extrato individual, selecione um membro.
+                        O modelo de envelopes mostra transferências internas do caixa
+                        físico para o cofre e o status do visto pastoral.
                     </p>
                 </fieldset>
             </section>

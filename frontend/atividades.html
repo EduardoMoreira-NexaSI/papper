@@ -11,6 +11,7 @@
     <title>Atividades | Papper</title>
 
     <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/v2.css">
 </head>
 
 <body class="pagina-dashboard">
@@ -97,6 +98,7 @@
                     <option value="evento">Evento</option>
                     <option value="ensaio">Ensaio</option>
                     <option value="estudo">Estudo bíblico</option>
+                    <option value="visita">Visita</option>
                     <option value="outro">Outro</option>
                 </select>
             </div>
@@ -125,6 +127,13 @@
                 id="botao-nova-atividade"
             >
                 + Nova atividade
+            </button>
+
+            <button
+                type="button"
+                id="botao-nova-recorrencia"
+            >
+                + Atividade recorrente
             </button>
         </section>
 
@@ -203,7 +212,7 @@
                             <option value="estudo">
                                 Estudo bíblico
                             </option>
-
+                            <option value="visita">Visita</option>
                             <option value="outro">Outro</option>
                         </select>
                     </div>
@@ -288,6 +297,80 @@
                 </div>
 
                 <p id="mensagem-formulario-atividade"></p>
+            </form>
+        </section>
+
+        <section id="painel-recorrencia-atividade" class="painel-recorrencia oculto">
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Recorrência</span>
+                    <h2>Nova atividade recorrente</h2>
+                    <p>Use para cultos, reuniões, ensaios ou visitas que se repetem semanalmente.</p>
+                </div>
+                <button type="button" id="botao-fechar-recorrencia" aria-label="Fechar">×</button>
+            </div>
+
+            <form id="form-atividade-recorrente">
+                <div class="form-recorrencia-grid">
+                    <div class="campo">
+                        <label for="recorrencia-titulo">Título</label>
+                        <input id="recorrencia-titulo" type="text" minlength="3" maxlength="150" required placeholder="Ex.: Culto de domingo">
+                    </div>
+                    <div class="campo">
+                        <label for="recorrencia-tipo">Tipo</label>
+                        <select id="recorrencia-tipo" required>
+                            <option value="">Selecione</option>
+                            <option value="culto">Culto</option>
+                            <option value="reuniao">Reunião</option>
+                            <option value="evento">Evento</option>
+                            <option value="ensaio">Ensaio</option>
+                            <option value="estudo">Estudo bíblico</option>
+                            <option value="visita">Visita</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="recorrencia-local">Local</label>
+                        <input id="recorrencia-local" type="text" maxlength="150" placeholder="Ex.: Templo principal">
+                    </div>
+                    <div class="campo">
+                        <label for="recorrencia-inicio">Primeira data e horário</label>
+                        <input id="recorrencia-inicio" type="datetime-local" required>
+                    </div>
+                    <div class="campo">
+                        <label for="recorrencia-fim-hora">Término da ocorrência</label>
+                        <input id="recorrencia-fim-hora" type="datetime-local">
+                    </div>
+                    <div class="campo">
+                        <label for="recorrencia-data-fim">Repetir até</label>
+                        <input id="recorrencia-data-fim" type="date" required>
+                    </div>
+                    <div class="campo campo-formulario-maior">
+                        <label>Dias da semana</label>
+                        <div class="dias-recorrencia" id="dias-recorrencia">
+                            <label class="dia-recorrencia"><input type="checkbox" value="segunda">Seg</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="terca">Ter</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="quarta">Qua</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="quinta">Qui</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="sexta">Sex</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="sabado">Sáb</label>
+                            <label class="dia-recorrencia"><input type="checkbox" value="domingo">Dom</label>
+                        </div>
+                    </div>
+                    <div class="campo campo-formulario-maior">
+                        <label for="recorrencia-descricao">Descrição</label>
+                        <textarea id="recorrencia-descricao" rows="3" maxlength="2000"></textarea>
+                    </div>
+                    <div class="campo campo-formulario-maior">
+                        <label for="recorrencia-observacoes">Notas internas</label>
+                        <textarea id="recorrencia-observacoes" rows="3" maxlength="2000"></textarea>
+                    </div>
+                </div>
+                <div class="acoes-formulario">
+                    <button type="button" id="botao-cancelar-recorrencia">Cancelar</button>
+                    <button type="submit" id="botao-salvar-recorrencia">Criar recorrência</button>
+                </div>
+                <p id="mensagem-recorrencia"></p>
             </form>
         </section>
 
@@ -440,6 +523,14 @@
 
                 <button
                     type="button"
+                    id="botao-realizar-atividade"
+                    class="botao-status-ficha"
+                >
+                    Marcar como realizada
+                </button>
+
+                <button
+                    type="button"
                     id="botao-cancelar-atividade"
                     class="botao-status-ficha"
                 >
@@ -466,5 +557,6 @@
 
     <script src="js/api.js"></script>
     <script src="js/atividades.js"></script>
+    <script src="js/atividades_v2.js"></script>
 </body>
 </html>
