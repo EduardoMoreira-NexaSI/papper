@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filiais | Papper</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/v2.css">
+  <link rel="stylesheet" href="css/filiais.css">
+</head>
+<body class="pagina-dashboard">
+  <aside class="menu-lateral">
+    <img src="assets/02_logo_papper_transparente.png" alt="Papper" class="logo-menu">
+    <nav class="menu-navegacao">
+      <a href="dashboard.html">Visão geral</a>
+      <a href="membros.html">Membros</a>
+      <a href="atividades.html">Atividades</a>
+      <a href="frequencia.html">Frequência</a>
+      <a href="financeiro.html">Financeiro</a>
+      <a href="funcoes.html">Funções</a>
+      <a href="grupos.html">Grupos</a>
+      <a href="filiais.html" class="ativo">Filiais</a>
+      <a href="relatorios.html">Relatórios</a>
+    </nav>
+    <button type="button" id="botao-sair">Sair</button>
+  </aside>
+
+  <main class="conteudo-dashboard">
+    <header class="cabecalho-dashboard">
+      <div>
+        <p class="saudacao">Estrutura da igreja</p>
+        <h1>Sede e filiais</h1>
+      </div>
+
+      <div class="usuario-logado">
+        <div class="usuario-avatar" id="usuario-avatar">P</div>
+        <div>
+          <strong id="usuario-nome">Carregando...</strong>
+          <span id="usuario-perfil"></span>
+        </div>
+      </div>
+    </header>
+
+    <p id="mensagem-filiais" class="mensagem-filiais" role="status"></p>
+
+    <section class="cards-resumo filiais-resumo">
+      <article class="card-resumo">
+        <span>Unidade atual</span>
+        <strong id="unidade-atual">—</strong>
+        <small id="tipo-unidade">—</small>
+      </article>
+
+      <article class="card-resumo">
+        <span>Igreja sede</span>
+        <strong id="nome-sede">—</strong>
+        <small id="presidente-sede">—</small>
+      </article>
+
+      <article class="card-resumo destaque">
+        <span>Filiais</span>
+        <strong id="total-filiais">0</strong>
+        <small>Vinculadas à sede</small>
+      </article>
+    </section>
+
+    <section id="painel-configurar-presidente" class="painel-dashboard oculto">
+      <div class="painel-dashboard-cabecalho">
+        <div>
+          <span class="etiqueta">Configuração inicial</span>
+          <h2>Definir pastor presidente</h2>
+        </div>
+      </div>
+
+      <p class="ajuda-filiais">
+        O master faz esta configuração uma única vez. Depois disso,
+        o pastor presidente passa a criar e administrar as filiais.
+      </p>
+
+      <form id="form-presidente" class="form-filiais">
+        <label>
+          <span>Usuário pastor</span>
+          <select id="presidente-usuario" required></select>
+        </label>
+
+        <button type="submit">Definir pastor presidente</button>
+      </form>
+    </section>
+
+    <section id="painel-nova-filial" class="painel-dashboard oculto">
+      <div class="painel-dashboard-cabecalho">
+        <div>
+          <span class="etiqueta">Expansão</span>
+          <h2>Criar nova filial</h2>
+        </div>
+      </div>
+
+      <form id="form-filial" class="form-filiais form-filiais-grid">
+        <label>
+          <span>Nome da filial</span>
+          <input
+            id="filial-nome"
+            required
+            minlength="3"
+            maxlength="150"
+            placeholder="Ex.: Filial Caxias"
+          >
+        </label>
+
+        <label>
+          <span>Endereço</span>
+          <input
+            id="filial-endereco"
+            required
+            minlength="3"
+            maxlength="250"
+          >
+        </label>
+
+        <label>
+          <span>Pastor responsável</span>
+          <select id="filial-pastor" required></select>
+        </label>
+
+        <button type="submit">Criar filial</button>
+      </form>
+    </section>
+
+    <section class="painel-dashboard">
+      <div class="painel-dashboard-cabecalho">
+        <div>
+          <span class="etiqueta">Organização</span>
+          <h2>Estrutura pastoral</h2>
+        </div>
+      </div>
+
+      <div id="estrutura-filiais" class="estrutura-filiais"></div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/filiais.js"></script>
+</body>
+</html>
