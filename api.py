@@ -123,6 +123,20 @@ app.add_middleware(
   allow_headers=["*"]
 )
 
+@app.middleware("http")
+async def desabilitar_cache_frontend(request, call_next):
+  response = await call_next(request)
+  caminho = request.url.path.lower()
+
+  # Durante a fase de testes, evita HTML/JS/CSS antigos após um deploy.
+  if caminho == "/" or caminho.endswith((".html", ".js", ".css")):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+  return response
+
+
 oauth2_scheme = OAuth2PasswordBearer(
   tokenUrl="/login"
 )
@@ -190,7 +204,7 @@ def inicia():
 
 @app.get("/health")
 def verifica_saude():
-  return {"status": "online"}
+  return {"status": "online", "version": "3.0.1-hotfix-desktop"}
 
 @app.post(
     "/igrejas",
