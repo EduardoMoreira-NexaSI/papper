@@ -1,0 +1,19 @@
+.filiais-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mensagem-filiais { min-height: 24px; margin-bottom: 12px; font-size: .9rem; }
+.mensagem-filiais.sucesso { color: #067647; }
+.mensagem-filiais.erro { color: #b42318; }
+.form-filiais { display: grid; gap: 14px; margin-top: 16px; }
+.form-filiais-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+.form-filiais label { display: grid; gap: 7px; color: #334e68; font-size: .85rem; font-weight: 700; }
+.form-filiais input, .form-filiais select { width: 100%; padding: 11px 12px; border: 1px solid #d9e2ec; border-radius: 9px; background: #fff; color: #243b53; font: inherit; }
+.form-filiais button { min-height: 43px; padding: 10px 16px; border: 0; border-radius: 9px; background: #1f5f8b; color: #fff; font-weight: 800; cursor: pointer; }
+.ajuda-filiais { margin-top: 8px; color: #627d98; line-height: 1.5; }
+.estrutura-filiais { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 16px; margin-top: 14px; }
+.unidade-card { padding: 20px; border: 1px solid #dce5ec; border-radius: 14px; background: #fff; box-shadow: 0 6px 18px rgba(16,42,67,.05); }
+.unidade-card.sede { border-top: 4px solid #d4a63a; }
+.unidade-card.filial { border-top: 4px solid #1f5f8b; }
+.unidade-tipo { display: inline-block; margin-bottom: 10px; color: #627d98; font-size: .7rem; font-weight: 900; letter-spacing: .08em; }
+.unidade-card h3 { margin-bottom: 7px; color: #102a43; }
+.unidade-card p { min-height: 40px; margin-bottom: 12px; color: #627d98; line-height: 1.4; }
+.unidade-card strong { color: #243b53; font-size: .86rem; }
+@media (max-width: 1050px) { .filiais-resumo, .form-filiais-grid, .estrutura-filiais { grid-template-columns: 1fr; } }

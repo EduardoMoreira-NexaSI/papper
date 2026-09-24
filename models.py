@@ -106,6 +106,19 @@ class IgrejaBanco(Base):
         nullable=True
     )
 
+    igreja_sede_id: Mapped[int | None] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=True,
+        index=True
+    )
+
+    pastor_responsavel_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=True,
+        unique=True,
+        index=True
+    )
+
     membros: Mapped[list["MembroBanco"]] = relationship(
         back_populates="igreja"
     )
@@ -761,6 +774,63 @@ class DepositoEnvelopeBanco(Base):
     aprovado_por_id: Mapped[int | None] = mapped_column(
         ForeignKey("usuarios.id"),
         nullable=True
+    )
+
+
+# =========================================================
+# LEMBRETES DO USUÁRIO
+# =========================================================
+
+class LembreteBanco(Base):
+    __tablename__ = "lembretes"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    titulo: Mapped[str] = mapped_column(
+        String(150),
+        nullable=False
+    )
+
+    descricao: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True
+    )
+
+    lembrar_em: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False
+    )
+
+    ativo: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=true()
+    )
+
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
+    )
+
+    desativado_em: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True
+    )
+
+    igreja_id: Mapped[int] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=False
+    )
+
+    usuario_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=False
     )
 
 

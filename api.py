@@ -13,6 +13,7 @@ from database import obter_banco
 from relatorios_backend import registrar_relatorios
 from admin_backend import registrar_admin
 from recursos_v2 import registrar_recursos_v2
+from filiais_backend import registrar_filiais
 
 
 from jwt.exceptions import InvalidTokenError
@@ -181,6 +182,7 @@ def exigir_perfis(*perfis_permitidos):
 registrar_relatorios(app, obter_usuario_atual)
 registrar_admin(app, obter_usuario_atual)
 registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, exigir_perfis)
+registrar_filiais(app, obter_usuario_atual)
 
 @app.get("/", include_in_schema=False)
 def inicia():
