@@ -1,0 +1,67 @@
+/* =========================================================
+   PAPPPER V2 — DASHBOARD, RECORRÊNCIA E ENVELOPES
+========================================================= */
+.dashboard-v2 { display: flex; flex-direction: column; gap: 24px; }
+.marca-igreja-dashboard { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo-igreja-wrap { width: 64px; height: 64px; border-radius: 16px; background: #eef3f7; border: 1px solid #dfe7ee; display: grid; place-items: center; overflow: hidden; font-weight: 800; color: #102a43; }
+.logo-igreja { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.botao-upload-logo { border: 1px solid #d8e0e7; background: #fff; padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: .85rem; font-weight: 700; }
+.texto-secundario { color: #697785; font-size: .86rem; }
+.cards-resumo-v2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grade-dashboard-v2 { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .8fr); gap: 20px; align-items: stretch; }
+.painel-dashboard { background: #fff; border: 1px solid #e2e8ee; border-radius: 18px; padding: 20px; box-shadow: 0 8px 28px rgba(16,42,67,.05); min-width: 0; }
+.painel-dashboard-cabecalho { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 18px; }
+.painel-dashboard h2 { margin: 4px 0 0; font-size: 1.12rem; }
+.legenda-fluxo { display: flex; gap: 10px; font-size: .75rem; color: #64748b; }
+.grafico-fluxo { height: 240px; display: flex; align-items: end; gap: 5px; overflow-x: auto; padding: 8px 0 0; border-bottom: 1px solid #dce4ea; }
+.coluna-fluxo { min-width: 27px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 5px; }
+.barras-fluxo { height: 190px; width: 100%; display: flex; gap: 3px; align-items: end; }
+.barras-fluxo span { flex: 1; min-height: 2px; border-radius: 5px 5px 1px 1px; }
+.barra-entrada { background: #2f855a; }
+.barra-saida { background: #c0564a; }
+.coluna-fluxo small { font-size: .62rem; writing-mode: vertical-rl; transform: rotate(180deg); color: #7a8793; max-height: 38px; }
+.grade-caixa-cofre { display: grid; gap: 12px; margin-bottom: 14px; }
+.grade-caixa-cofre > div { padding: 14px; border-radius: 12px; background: #f7f9fb; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.grade-caixa-cofre span { color: #667582; font-size: .86rem; }
+.grade-caixa-cofre strong { color: #102a43; }
+.lista-dashboard { display: flex; flex-direction: column; gap: 8px; }
+.item-lista-dashboard { color: inherit; text-decoration: none; display: flex; justify-content: space-between; gap: 12px; padding: 12px 10px; border-bottom: 1px solid #edf1f4; }
+.item-lista-dashboard:hover { background: #f8fafc; }
+.item-lista-dashboard span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.item-lista-dashboard small, .item-lista-dashboard time { color: #72808d; font-size: .78rem; }
+.item-lista-dashboard time { white-space: nowrap; }
+.estado-vazio-dashboard { color: #718096; padding: 18px 0; }
+.tabela-dashboard-compacta th, .tabela-dashboard-compacta td { padding: 10px 8px; font-size: .82rem; }
+.status-dashboard { display: inline-flex; padding: 4px 8px; border-radius: 999px; font-size: .72rem; text-transform: capitalize; background: #edf2f7; }
+.status-realizado, .status-aprovado { background: #e6ffed; color: #237a43; }
+.status-agendado, .status-aguardando-visto { background: #fff7df; color: #8a641f; }
+.status-cancelado, .status-rejeitado { background: #fff0ef; color: #a63e35; }
+.valor-entrada { color: #237a43; font-weight: 700; }
+.valor-saida { color: #b0443b; font-weight: 700; }
+
+.form-recorrencia-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.dias-recorrencia { display: flex; flex-wrap: wrap; gap: 8px; }
+.dia-recorrencia { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid #d9e2e9; border-radius: 10px; background: #fff; cursor: pointer; }
+.painel-recorrencia { border: 1px solid #dce6ee; border-radius: 16px; padding: 18px; margin: 18px 0; background: #fbfcfd; }
+
+.grade-envelopes-resumo { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin: 16px 0; }
+.grade-envelopes-resumo article { background: #fff; border: 1px solid #e1e8ee; border-radius: 14px; padding: 16px; }
+.grade-envelopes-resumo span { display: block; color: #667582; font-size: .82rem; margin-bottom: 6px; }
+.grade-envelopes-resumo strong { color: #102a43; font-size: 1.15rem; }
+.form-envelope { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.form-envelope .campo-largo { grid-column: 1 / -1; }
+.acoes-envelope { display: flex; gap: 6px; flex-wrap: wrap; }
+.acoes-envelope button, .acoes-envelope a { border: 1px solid #d6e0e7; background: #fff; color: #102a43; padding: 6px 9px; border-radius: 8px; font-size: .75rem; text-decoration: none; cursor: pointer; }
+.acoes-envelope .aprovar { border-color: #bde5ca; color: #237a43; }
+.acoes-envelope .rejeitar { border-color: #f0c2bd; color: #a63e35; }
+
+@media (max-width: 1100px) {
+  .cards-resumo-v2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grade-dashboard-v2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .cards-resumo-v2, .grade-envelopes-resumo, .form-recorrencia-grid, .form-envelope { grid-template-columns: 1fr; }
+  .form-envelope .campo-largo { grid-column: auto; }
+  .marca-igreja-dashboard { align-items: flex-start; }
+  .botao-upload-logo { width: 100%; text-align: center; }
+}

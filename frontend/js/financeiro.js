@@ -788,9 +788,9 @@ function atualizarRegrasCategoria() {
         categoria === "oferta" ||
         categoria === "doacao";
 
-    const permiteAnexo =
-        categoria === "despesa" ||
-        categoria === "outro";
+    // Anexos genéricos de despesas ainda não têm persistência no backend.
+    // O comprovante obrigatório nesta versão é tratado pelo fluxo de envelope.
+    const permiteAnexo = false;
 
     campoMembro.required = ehDizimo;
 

@@ -1,99 +1,124 @@
 <!DOCTYPE html>
-<html lang="pt-Br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Papper</title>
-
+  <title>Visão geral | Papper</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/v2.css">
 </head>
-
 <body class="pagina-dashboard">
   <aside class="menu-lateral">
-    <img
-      src="assets/02_logo_papper_transparente.png"
-      alt="Papper"
-      class="logo-menu"> 
-
+    <img src="assets/02_logo_papper_transparente.png" alt="Papper" class="logo-menu">
     <nav class="menu-navegacao">
       <a href="dashboard.html" class="ativo">Visão geral</a>
       <a href="membros.html">Membros</a>
       <a href="atividades.html">Atividades</a>
       <a href="frequencia.html">Frequência</a>
       <a href="financeiro.html">Financeiro</a>
-      <a href="funcoes.html">Funçoes</a>
+      <a href="funcoes.html">Funções</a>
       <a href="grupos.html">Grupos</a>
       <a href="relatorios.html">Relatórios</a>
     </nav>
-
-    <button type="button" id="botao-sair">
-      Sair
-    </button>
+    <button type="button" id="botao-sair">Sair</button>
   </aside>
 
-  <main class="conteudo-dashboard">
+  <main class="conteudo-dashboard dashboard-v2">
     <header class="cabecalho-dashboard">
-      
-      <div>
-        <p class="saudacao">Painel Gerencial Pastoral</p>
-        <h1>Visão geral</h1>
+      <div class="marca-igreja-dashboard">
+        <div class="logo-igreja-wrap">
+          <img id="logo-igreja" class="logo-igreja oculto" alt="Logo da igreja">
+          <span id="logo-igreja-placeholder">IG</span>
+        </div>
+        <div>
+          <p class="saudacao">Painel Gerencial Pastoral</p>
+          <h1 id="nome-igreja-dashboard">Visão geral</h1>
+          <span id="presidente-igreja-dashboard" class="texto-secundario"></span>
+        </div>
+        <label class="botao-upload-logo" id="acao-logo-igreja">
+          Alterar logo
+          <input type="file" id="arquivo-logo-igreja" accept="image/png,image/jpeg,image/webp" hidden>
+        </label>
       </div>
 
       <div class="usuario-logado">
-        <div class="usuario-avatar" id="usuario-avatar">u</div>
-      
-
+        <div class="usuario-avatar" id="usuario-avatar">U</div>
         <div>
-          <strong id="usuario-nome">Carregando... </strong>
+          <strong id="usuario-nome">Carregando...</strong>
           <span id="usuario-perfil"></span>
         </div>
       </div>
-
     </header>
 
-  <section class="cards-resumo">
-    <article class="card-resumo">
-      <span>Membros ativos</span>
-      <strong id="total-membros">—</strong>
-      <small>Cadastrados na igreja</small>
-    </article>
+    <section class="cards-resumo cards-resumo-v2">
+      <article class="card-resumo"><span>Membros ativos</span><strong id="total-membros">—</strong><small>Total atual</small></article>
+      <article class="card-resumo"><span>Novos no mês</span><strong id="membros-novos-mes">—</strong><small>Cadastros neste mês</small></article>
+      <article class="card-resumo"><span>Próximas atividades</span><strong id="total-atividades">—</strong><small>Próximos 45 dias</small></article>
+      <article class="card-resumo"><span>Visitas agendadas</span><strong id="visitas-agendadas">—</strong><small>No mês atual</small></article>
+      <article class="card-resumo"><span>Visitas realizadas</span><strong id="visitas-realizadas">—</strong><small>No mês atual</small></article>
+      <article class="card-resumo"><span>Entradas do mês</span><strong id="total-entradas">R$ —</strong><small>Movimentações registradas</small></article>
+      <article class="card-resumo"><span>Saídas do mês</span><strong id="total-saidas">R$ —</strong><small>Movimentações registradas</small></article>
+      <article class="card-resumo destaque"><span>Resultado do mês</span><strong id="saldo-atual">R$ —</strong><small>Entradas menos saídas</small></article>
+    </section>
 
-    <article class="card-resumo">
-      <span>Próximas atividades</span>
-      <strong id="total-atividades">—</strong>
-      <small>Cultos, reuniões e eventos</small>
-    </article>
+    <section class="grade-dashboard-v2">
+      <article class="painel-dashboard painel-grafico">
+        <div class="painel-dashboard-cabecalho">
+          <div><span class="etiqueta">Financeiro</span><h2>Fluxo dos últimos 30 dias</h2></div>
+          <div class="legenda-fluxo"><span>↑ Entradas</span><span>↓ Saídas</span></div>
+        </div>
+        <div id="grafico-fluxo" class="grafico-fluxo" aria-label="Gráfico de entradas e saídas"></div>
+      </article>
 
-    <article class="card-resumo">
-      <span>Entradas</span>
-      <strong id="total-entradas">R$ —</strong>
-      <small>Dízimos, ofertas e doações</small>
-    </article>
+      <article class="painel-dashboard painel-caixa">
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Custódia</span><h2>Caixa e cofre</h2></div></div>
+        <div class="grade-caixa-cofre">
+          <div><span>Caixa físico estimado</span><strong id="caixa-fisico">R$ —</strong></div>
+          <div><span>Valor em cofre</span><strong id="cofre-estimado">R$ —</strong></div>
+          <div><span>Aguardando visto pastoral</span><strong id="envelopes-pendentes">R$ —</strong></div>
+        </div>
+        <small class="texto-secundario">Estimativa baseada em lançamentos marcados como dinheiro e depósitos em envelope.</small>
+      </article>
+    </section>
 
-    <article class="card-resumo destaque">
-      <span>Saldo atual</span>
-      <strong id="saldo-atual">R$ —</strong>
-      <small>Resumo financeiro</small>
-    </article>
-  </section>
+    <section class="grade-dashboard-v2">
+      <article class="painel-dashboard">
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Agenda</span><h2>Calendário</h2></div></div>
+        <div id="calendario-atividades" class="lista-dashboard"></div>
+      </article>
 
-  <section class="painel-boas-vindas">
-    <div>
-      <span class="etiqueta">Papper</span>
-      <h2>Bem-vindo ao painel da sua igreja</h2>
+      <article class="painel-dashboard">
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Membros</span><h2>Novos no mês</h2></div></div>
+        <div id="lista-novos-membros" class="lista-dashboard"></div>
+      </article>
+    </section>
 
-      <p>
-        Acompanhe membros, frequências, atividades  e movimentações financeiras em um só lugar.
-      </p>
-    </div>
-  </section>
+    <section class="grade-dashboard-v2">
+      <article class="painel-dashboard">
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Pastoral</span><h2>Visitas</h2></div></div>
+        <div class="tabela-responsiva">
+          <table class="tabela-dados tabela-dashboard-compacta">
+            <thead><tr><th>Visita</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody id="tabela-visitas-dashboard"></tbody>
+          </table>
+        </div>
+      </article>
 
-  <p id="mensagem-dashboard"></p>
+      <article class="painel-dashboard" id="painel-movimentacoes-recentes">
+        <div class="painel-dashboard-cabecalho"><div><span class="etiqueta">Financeiro</span><h2>Movimentações recentes</h2></div></div>
+        <div class="tabela-responsiva">
+          <table class="tabela-dados tabela-dashboard-compacta">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead>
+            <tbody id="tabela-movimentacoes-dashboard"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
 
+    <p id="mensagem-dashboard"></p>
   </main>
 
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
-
 </body>
 </html>

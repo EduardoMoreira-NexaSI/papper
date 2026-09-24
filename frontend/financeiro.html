@@ -11,6 +11,7 @@
     <title>Financeiro | Papper</title>
 
     <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/v2.css">
 </head>
 
 <body class="pagina-dashboard">
@@ -242,7 +243,7 @@
 
                     <span class="acao-financeira-texto">
                         <strong>Registrar despesa</strong>
-                        <small>Permite anexar nota fiscal</small>
+                        <small>Saída com descrição e forma de pagamento</small>
                     </span>
                 </button>
 
@@ -260,6 +261,18 @@
                     <span class="acao-financeira-texto">
                         <strong>Outra movimentação</strong>
                         <small>Entrada ou saída personalizada</small>
+                    </span>
+                </button>
+
+                <button
+                    type="button"
+                    id="botao-deposito-envelope"
+                    class="acao-financeira acao-outra"
+                >
+                    <span class="acao-financeira-icone">E</span>
+                    <span class="acao-financeira-texto">
+                        <strong>Depósito em envelope</strong>
+                        <small>Caixa físico → cofre, com comprovante e visto pastoral</small>
                     </span>
                 </button>
 
@@ -610,6 +623,62 @@
 
         </section>
 
+        <section id="formulario-envelope-container" class="formulario-painel oculto">
+            <div class="titulo-formulario">
+                <div>
+                    <span class="etiqueta">Transferência interna</span>
+                    <h2>Depósito em envelope</h2>
+                    <p>O valor sai do caixa físico e passa para o cofre. Esta operação não é uma despesa da igreja.</p>
+                </div>
+                <button type="button" id="botao-fechar-envelope" class="botao-fechar-formulario" aria-label="Fechar">×</button>
+            </div>
+            <form id="form-envelope" class="form-envelope">
+                <div class="campo">
+                    <label for="envelope-valor">Valor</label>
+                    <input id="envelope-valor" type="number" min="0.01" step="0.01" required>
+                </div>
+                <div class="campo">
+                    <label for="envelope-data">Data e horário do depósito</label>
+                    <input id="envelope-data" type="datetime-local" required>
+                </div>
+                <div class="campo campo-largo">
+                    <label for="envelope-comprovante">Comprovante obrigatório</label>
+                    <input id="envelope-comprovante" type="file" accept="application/pdf,image/png,image/jpeg" required>
+                    <small>PDF, PNG ou JPG/JPEG, até 5 MB.</small>
+                </div>
+                <div class="campo campo-largo">
+                    <label for="envelope-observacao">Observação</label>
+                    <textarea id="envelope-observacao" rows="3" maxlength="1000" placeholder="Ex.: valores do culto de domingo"></textarea>
+                </div>
+                <div class="acoes-formulario campo-largo">
+                    <button type="button" id="botao-cancelar-envelope">Cancelar</button>
+                    <button type="submit" id="botao-salvar-envelope">Lançar envelope</button>
+                </div>
+                <p id="mensagem-envelope" class="campo-largo"></p>
+            </form>
+        </section>
+
+        <section class="tabela-container" id="painel-envelopes">
+            <div class="tabela-cabecalho">
+                <div>
+                    <span class="etiqueta">Custódia</span>
+                    <h2>Envelopes e cofre</h2>
+                    <p>Numeração automática, comprovante obrigatório e visto do pastor presidente.</p>
+                </div>
+            </div>
+            <div class="grade-envelopes-resumo">
+                <article><span>Caixa físico estimado</span><strong id="resumo-caixa-fisico">R$ —</strong></article>
+                <article><span>Valor em cofre</span><strong id="resumo-cofre">R$ —</strong></article>
+                <article><span>Aguardando visto</span><strong id="resumo-envelope-pendente">R$ —</strong></article>
+            </div>
+            <div class="tabela-responsiva">
+                <table class="tabela-dados">
+                    <thead><tr><th>Envelope</th><th>Data</th><th>Valor</th><th>Status</th><th>Responsável</th><th>Ações</th></tr></thead>
+                    <tbody id="corpo-tabela-envelopes"><tr><td colspan="6">Carregando envelopes...</td></tr></tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Filtros -->
 
         <section class="painel-filtros-financeiro">
@@ -796,6 +865,7 @@
 
     <script src="js/api.js"></script>
     <script src="js/financeiro.js"></script>
+    <script src="js/financeiro_v2.js"></script>
 
 </body>
 </html>

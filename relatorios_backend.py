@@ -23,7 +23,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from database import obter_banco
 from models import (IgrejaBanco, MembroBanco, FuncaoBanco, GrupoBanco,
-                    AtividadeBanco, PresencaBanco, MovimentacaoFinanceiraBanco)
+                    AtividadeBanco, PresencaBanco, MovimentacaoFinanceiraBanco,
+                    DepositoEnvelopeBanco, UsuarioBanco)
 
 TODOS = ("membros", "financeiro", "atividades", "frequencia", "funcoes", "grupos")
 # Política explícita para exportação em massa; cargos de membros não são perfis.
@@ -64,7 +65,7 @@ class FiltrosRelatorio(BaseModel):
     membros_incluir_endereco: bool = False
     membros_incluir_nascimento: bool = False
     membros_exibicao_cpf: Literal["oculto", "mascarado", "completo"] = "oculto"
-    financeiro_modelo: Literal["resumo", "extrato", "fluxo", "categorias"] = "resumo"
+    financeiro_modelo: Literal["resumo", "extrato", "fluxo", "categorias", "membro", "envelopes"] = "resumo"
     financeiro_tipo: Literal["", "entrada", "saida"] = ""
     financeiro_categoria: Literal["", "dizimo", "oferta", "doacao", "despesa", "outro"] = ""
     financeiro_forma_pagamento: str = Field(default="", max_length=30)
@@ -243,47 +244,100 @@ def relatorio_membros(banco, igreja_id, f):
 
 def relatorio_financeiro(banco, igreja_id, f):
     m = MovimentacaoFinanceiraBanco
+
+    if f.financeiro_modelo == "envelopes":
+        e = DepositoEnvelopeBanco
+        q = periodo(select(e).where(e.igreja_id == igreja_id), e.data_deposito, f).order_by(e.data_deposito, e.numero)
+        itens = registros(banco, q)
+        ids_usuarios = {x.criado_por_id for x in itens} | {x.aprovado_por_id for x in itens if x.aprovado_por_id}
+        nomes = dict(banco.execute(select(UsuarioBanco.id, UsuarioBanco.nome).where(UsuarioBanco.id.in_(ids_usuarios))).all()) if ids_usuarios else {}
+        total = sum((x.valor for x in itens if x.status != "rejeitado"), ZERO)
+        pendente = sum((x.valor for x in itens if x.status == "aguardando_visto"), ZERO)
+        cols = [coluna("envelope", "Envelope"), coluna("data", "Data"), coluna("valor", "Valor", True),
+                coluna("status", "Status"), coluna("lancado_por", "Lançado por"), coluna("visto_por", "Visto por"),
+                coluna("observacao", "Observação")]
+        linhas = [dict(envelope=f"ENV-{x.numero:06d}", data=data_br(x.data_deposito), valor=moeda(x.valor),
+                       status=x.status.replace("_", " ").capitalize(), lancado_por=nomes.get(x.criado_por_id, "Não disponível"),
+                       visto_por=nomes.get(x.aprovado_por_id, "Aguardando") if x.aprovado_por_id else "Aguardando",
+                       observacao=x.observacao or "") for x in itens]
+        indicadores = [dict(rotulo="Transferido ao cofre no período", valor=moeda(total), classe="saldo"),
+                       dict(rotulo="Aguardando visto pastoral", valor=moeda(pendente)),
+                       dict(rotulo="Envelopes", valor=len(itens))]
+        notas = ["Depósitos em envelope são transferências internas do caixa físico para o cofre; não são receita nem despesa.",
+                 "Envelopes rejeitados permanecem no histórico de auditoria, mas não compõem o total transferido ao cofre."]
+        return cols, linhas, indicadores, notas
+
     base = select(m).where(m.igreja_id == igreja_id)
     for campo in ("tipo", "categoria"):
         valor = getattr(f, "financeiro_" + campo)
-        if valor: base = base.where(getattr(m, campo) == valor)
+        if valor:
+            base = base.where(getattr(m, campo) == valor)
     if f.financeiro_forma_pagamento == "sem_informacao":
         base = base.where((m.forma_pagamento.is_(None)) | (m.forma_pagamento == ""))
     elif f.financeiro_forma_pagamento:
         base = base.where(m.forma_pagamento == f.financeiro_forma_pagamento)
+
+    membro_filtrado = None
+    atividade_filtrada = None
     for campo, modelo in (("membro", MembroBanco), ("atividade", AtividadeBanco)):
         valor = getattr(f, "financeiro_" + campo)
         obj = vinculo(banco, modelo, valor, igreja_id, "sem_vinculo")
         col = getattr(m, campo + "_id")
-        if valor == "sem_vinculo": base = base.where(col.is_(None))
-        elif obj: base = base.where(col == obj.id)
+        if valor == "sem_vinculo":
+            base = base.where(col.is_(None))
+        elif obj:
+            base = base.where(col == obj.id)
+            if campo == "membro": membro_filtrado = obj
+            else: atividade_filtrada = obj
+
+    if f.financeiro_modelo == "membro" and membro_filtrado is None:
+        raise HTTPException(422, "Selecione um membro específico para emitir o extrato individual.")
+
     itens = registros(banco, periodo(base, m.data_movimentacao, f).order_by(m.data_movimentacao, m.id))
     if any(x.tipo not in ("entrada", "saida") for x in itens):
         raise HTTPException(422, "Há movimentações com tipo inválido. Corrija-as antes de emitir o relatório.")
+
     entradas = sum((x.valor for x in itens if x.tipo == "entrada"), ZERO)
     saidas = sum((x.valor for x in itens if x.tipo == "saida"), ZERO)
+    categorias = {
+        categoria: sum((x.valor for x in itens if x.tipo == "entrada" and x.categoria == categoria), ZERO)
+        for categoria in ("dizimo", "oferta", "doacao")
+    }
     indicadores = [
         dict(rotulo="Entradas do período filtrado", valor=moeda(entradas), classe="entrada"),
         dict(rotulo="Saídas do período filtrado", valor=moeda(saidas), classe="saida"),
         dict(rotulo="Resultado do período filtrado", valor=moeda(entradas-saidas), classe="saldo"),
+        dict(rotulo="Dízimos", valor=moeda(categorias["dizimo"])),
+        dict(rotulo="Ofertas", valor=moeda(categorias["oferta"])),
+        dict(rotulo="Doações", valor=moeda(categorias["doacao"])),
         dict(rotulo="Movimentações", valor=len(itens)),
     ]
+    if membro_filtrado:
+        indicadores.insert(0, dict(rotulo="Membro", valor=membro_filtrado.nome))
+    if atividade_filtrada:
+        indicadores.insert(0, dict(rotulo="Atividade", valor=atividade_filtrada.titulo))
+
     notas = ["Valores baseados nos lançamentos registrados. O resultado do período não é o saldo bancário conciliado."]
-    if f.financeiro_modelo == "extrato":
+
+    if f.financeiro_modelo in ("extrato", "membro"):
+        ids_membros = {x.membro_id for x in itens if x.membro_id}
+        ids_atividades = {x.atividade_id for x in itens if x.atividade_id}
+        nomes = dict(banco.execute(select(MembroBanco.id, MembroBanco.nome).where(MembroBanco.igreja_id == igreja_id, MembroBanco.id.in_(ids_membros))).all()) if ids_membros else {}
+        atividades = dict(banco.execute(select(AtividadeBanco.id, AtividadeBanco.titulo).where(AtividadeBanco.igreja_id == igreja_id, AtividadeBanco.id.in_(ids_atividades))).all()) if ids_atividades else {}
         cols = [coluna("id", "ID"), coluna("data", "Data"), coluna("tipo", "Tipo"), coluna("categoria", "Categoria"),
-                coluna("descricao", "Descrição"), coluna("valor", "Valor", True), coluna("forma", "Pagamento")]
-        nomes = {}
-        if f.financeiro_identificar_membros:
-            ids = {x.membro_id for x in itens if x.membro_id}
-            nomes = dict(banco.execute(select(MembroBanco.id, MembroBanco.nome).where(MembroBanco.igreja_id == igreja_id, MembroBanco.id.in_(ids))).all())
-            cols.append(coluna("membro", "Membro"))
+                coluna("descricao", "Descrição"), coluna("membro", "Membro"), coluna("atividade", "Atividade"),
+                coluna("forma", "Pagamento"), coluna("valor", "Valor", True), coluna("saldo", "Saldo do recorte", True)]
+        saldo_recorte = ZERO
         linhas = []
         for x in itens:
-            r = dict(id=x.id, data=data_br(x.data_movimentacao), tipo=x.tipo, categoria=x.categoria,
-                     descricao=x.descricao or "", valor=moeda(x.valor), forma=x.forma_pagamento or "Não informada")
-            if f.financeiro_identificar_membros: r["membro"] = nomes.get(x.membro_id, "Sem vínculo disponível")
-            linhas.append(r)
-        notas.append("Descrições são textos livres e podem conter nomes registrados no lançamento.")
+            saldo_recorte += x.valor if x.tipo == "entrada" else -x.valor
+            linhas.append(dict(id=x.id, data=data_br(x.data_movimentacao), tipo=x.tipo.capitalize(), categoria=x.categoria.capitalize(),
+                              descricao=x.descricao or "", membro=nomes.get(x.membro_id, "Sem vínculo"),
+                              atividade=atividades.get(x.atividade_id, "Sem vínculo"), forma=x.forma_pagamento or "Não informada",
+                              valor=moeda(x.valor), saldo=moeda(saldo_recorte)))
+        notas.append("Saldo do recorte inicia em zero e demonstra a sequência exata dos lançamentos filtrados.")
+        if f.financeiro_modelo == "membro":
+            notas.append("Extrato individual: somente movimentações vinculadas diretamente ao membro selecionado.")
     elif f.financeiro_modelo == "fluxo":
         anteriores = registros(banco, base.where(m.data_movimentacao < datetime.combine(f.data_inicio, time.min)))
         if any(x.tipo not in ("entrada", "saida") for x in anteriores):
@@ -294,27 +348,27 @@ def relatorio_financeiro(banco, igreja_id, f):
         for x in itens:
             chave = x.data_movimentacao.strftime("%Y-%m" if f.financeiro_agrupamento == "mes" else "%Y-%m-%d")
             agrupados[chave][0 if x.tipo == "entrada" else 1] += x.valor
-        cols = [coluna("periodo", "Período"), coluna("entradas", "Entradas", True), coluna("saidas", "Saídas", True), coluna("saldo", "Saldo acumulado do recorte", True)]
+        cols = [coluna("periodo", "Período"), coluna("entradas", "Entradas", True), coluna("saidas", "Saídas", True), coluna("resultado", "Resultado", True), coluna("saldo", "Saldo acumulado", True)]
         linhas = []
         for chave, (e, s) in sorted(agrupados.items()):
             saldo += e - s
             rotulo = datetime.strptime(chave, "%Y-%m" if len(chave) == 7 else "%Y-%m-%d").strftime("%m/%Y" if len(chave) == 7 else "%d/%m/%Y")
-            linhas.append(dict(periodo=rotulo, entradas=moeda(e), saidas=moeda(s), saldo=moeda(saldo)))
+            linhas.append(dict(periodo=rotulo, entradas=moeda(e), saidas=moeda(s), resultado=moeda(e-s), saldo=moeda(saldo)))
         indicadores.append(dict(rotulo="Saldo final do recorte", valor=moeda(saldo)))
-        notas.append("Saldo anterior = entradas menos saídas registradas antes do período, com os mesmos filtros. Só aparecem dias/meses com lançamentos. Não inclui projeções nem saldo inicial não lançado.")
+        notas.append("Saldo anterior = entradas menos saídas registradas antes do período, com os mesmos filtros. Não inclui projeções nem saldo inicial não lançado.")
     elif f.financeiro_modelo == "categorias":
         agrupados = defaultdict(lambda: ZERO)
         for x in itens: agrupados[(x.tipo, x.categoria)] += x.valor
-        cols = [coluna("tipo", "Tipo"), coluna("categoria", "Categoria"), coluna("valor", "Total", True)]
-        linhas = [dict(tipo=t, categoria=c, valor=moeda(v)) for (t, c), v in sorted(agrupados.items())]
+        cols = [coluna("tipo", "Tipo"), coluna("categoria", "Categoria"), coluna("quantidade", "Lançamentos", True), coluna("valor", "Total", True)]
+        contagens = defaultdict(int)
+        for x in itens: contagens[(x.tipo, x.categoria)] += 1
+        linhas = [dict(tipo=t.capitalize(), categoria=c.capitalize(), quantidade=contagens[(t,c)], valor=moeda(v)) for (t, c), v in sorted(agrupados.items())]
     else:
         cols = [coluna("descricao", "Indicador"), coluna("valor", "Valor", True)]
         linhas = [dict(descricao="Entradas", valor=moeda(entradas)), dict(descricao="Saídas", valor=moeda(saidas)), dict(descricao="Resultado do período", valor=moeda(entradas-saidas))]
         for categoria in ("dizimo", "oferta", "doacao"):
-            total = sum((x.valor for x in itens if x.tipo == "entrada" and x.categoria == categoria), ZERO)
-            linhas.append(dict(descricao=categoria.capitalize(), valor=moeda(total)))
+            linhas.append(dict(descricao=categoria.capitalize(), valor=moeda(categorias[categoria])))
     return cols, linhas, indicadores, notas
-
 
 def relatorio_atividades(banco, igreja_id, f):
     a = AtividadeBanco
@@ -403,14 +457,14 @@ GERADORES = {"membros": relatorio_membros, "financeiro": relatorio_financeiro,
              "funcoes": relatorio_equipes, "grupos": relatorio_equipes}
 
 
-def gerar_pdf(resultado, f):
+def gerar_pdf(resultado, f, igreja):
     import reportlab
     from reportlab.lib import colors
     from reportlab.lib.enums import TA_RIGHT
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, LongTable, TableStyle, PageBreak
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, LongTable, TableStyle, PageBreak, Image
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     # Fontes incluídas no próprio ReportLab, incorporadas ao PDF.
@@ -432,7 +486,16 @@ def gerar_pdf(resultado, f):
     cabecalho = ParagraphStyle("PapperCabecalho", parent=celula, textColor=colors.white, fontName="PapperVeraBold")
     def p(texto, style=estilo):
         return Paragraph(escape(str(texto if texto is not None else "Não informado")).replace("\n", "<br/>"), style)
-    conteudo = [p(f.titulo, estilos["Title"]), p(resultado["igreja_nome"], estilos["Heading2"]),
+    conteudo = []
+    if igreja.logo_dados:
+        try:
+            logo = Image(BytesIO(igreja.logo_dados), width=24*mm, height=24*mm)
+            logo.hAlign = "LEFT"
+            conteudo += [logo, Spacer(1, 2*mm)]
+        except Exception:
+            pass
+    conteudo += [p(igreja.nome, estilos["Heading2"]), p(f.titulo, estilos["Title"]),
+                p("Presidente: " + igreja.presidente),
                 p("Emitido: " + data_br(datetime.fromisoformat(resultado["gerado_em"])) + " UTC | Responsável: " + resultado["responsavel"]),
                 p(f"Total de linhas: {resultado['total_registros']}")]
     conteudo.append(p("Filtros e opções", estilos["Heading3"]))
@@ -469,7 +532,7 @@ def gerar_pdf(resultado, f):
         canvas.saveState()
         canvas.setFillColor(colors.HexColor("#102a43"))
         canvas.setFont("PapperVeraBold", 9)
-        canvas.drawString(15*mm, pagina[1]-12*mm, "PAPPER | Painel Gerencial Pastoral")
+        canvas.drawString(15*mm, pagina[1]-12*mm, f"{igreja.nome} | PAPPER")
         canvas.setFont("PapperVera", 8)
         canvas.drawString(15*mm, 10*mm, "Uso interno - dados da igreja")
         canvas.drawRightString(pagina[0]-15*mm, 10*mm, f"Página {documento.page}")
@@ -549,8 +612,8 @@ def registrar_relatorios(app, obter_usuario_atual):
             if item[1:4] != (usuario.id, igreja_id, usuario.perfil):
                 raise HTTPException(403, "Esta consulta não pertence à sua sessão autorizada.")
             resultado, f = deepcopy(item[4]), item[5].model_copy(deep=True)
-        autorizar(banco, usuario, igreja_id, f.tipo_relatorio)
-        conteudo = gerar_pdf(resultado, f)
+        igreja = autorizar(banco, usuario, igreja_id, f.tipo_relatorio)
+        conteudo = gerar_pdf(resultado, f, igreja)
         return Response(conteudo, media_type="application/pdf", headers={
             "Content-Disposition": 'attachment; filename="papper-relatorio.pdf"',
             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
