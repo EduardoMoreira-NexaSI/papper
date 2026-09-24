@@ -106,6 +106,18 @@ class IgrejaBanco(Base):
         nullable=True
     )
 
+    igreja_sede_id: Mapped[int | None] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=True,
+        index=True
+    )
+
+    pastor_responsavel_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=True,
+        index=True
+    )
+
     membros: Mapped[list["MembroBanco"]] = relationship(
         back_populates="igreja"
     )
