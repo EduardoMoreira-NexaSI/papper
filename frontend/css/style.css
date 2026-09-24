@@ -5166,3 +5166,72 @@ input {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* =========================================================
+   HOTFIX CRITICO DESKTOP — 2026-09-24
+   Mantém o mesmo comportamento funcional em desktop e mobile.
+========================================================= */
+
+/* A página ADM precisa usar o mesmo grid estrutural das telas do painel. */
+.pagina-admin {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    min-height: 100vh;
+    background-color: var(--fundo);
+}
+
+.pagina-admin .admin-conteudo {
+    min-width: 0;
+}
+
+/*
+   frequencia.html usa modal-fundo. Sem esta regra, no desktop o modal
+   entrava como uma nova célula do CSS Grid e ficava fora da área visível.
+*/
+.modal-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 24px;
+    background: rgba(11, 29, 45, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.modal-fundo.oculto {
+    display: none !important;
+}
+
+.modal-fundo > .modal-conteudo {
+    position: relative;
+    width: min(100%, 760px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 26px;
+    background: var(--branco);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.30);
+}
+
+.modal-fundo > .modal-presenca {
+    width: min(520px, 100%);
+}
+
+@media (max-width: 760px) {
+    .pagina-admin {
+        display: block;
+    }
+
+    .modal-fundo {
+        padding: 14px;
+    }
+
+    .modal-fundo > .modal-conteudo {
+        max-height: calc(100vh - 28px);
+        padding: 20px;
+    }
+}
