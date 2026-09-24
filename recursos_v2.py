@@ -497,15 +497,37 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
             raise HTTPException(404, "Envelope não encontrado.")
         return item
 
+    def _exigir_responsavel_unidade(
+        banco: Session,
+        usuario: UsuarioBanco,
+        igreja_id: int,
+    ) -> IgrejaBanco:
+        igreja = banco.get(IgrejaBanco, igreja_id)
+        if igreja is None:
+            raise HTTPException(404, "Igreja não encontrada.")
+
+        if (
+            usuario.perfil != "pastor"
+            or igreja.pastor_responsavel_id is None
+            or igreja.pastor_responsavel_id != usuario.id
+        ):
+            raise HTTPException(
+                403,
+                "Somente o pastor responsável por esta unidade pode dar o visto no envelope.",
+            )
+
+        return igreja
+
     @router.post("/igrejas/{igreja_id}/financeiro/envelopes/{envelope_id}/aprovar")
     def aprovar_envelope(
         igreja_id: int,
         envelope_id: int,
         dados: VistoEnvelope,
         banco: Session = Depends(obter_banco),
-        usuario: UsuarioBanco = Depends(exigir_perfis("pastor")),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
     ):
         validar_igreja_do_usuario(usuario, igreja_id)
+        _exigir_responsavel_unidade(banco, usuario, igreja_id)
         item = _buscar_envelope(banco, igreja_id, envelope_id)
         if item.status != "aguardando_visto":
             raise HTTPException(409, "Este envelope já foi analisado.")
@@ -523,9 +545,10 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         envelope_id: int,
         dados: VistoEnvelope,
         banco: Session = Depends(obter_banco),
-        usuario: UsuarioBanco = Depends(exigir_perfis("pastor")),
+        usuario: UsuarioBanco = Depends(obter_usuario_atual),
     ):
         validar_igreja_do_usuario(usuario, igreja_id)
+        _exigir_responsavel_unidade(banco, usuario, igreja_id)
         item = _buscar_envelope(banco, igreja_id, envelope_id)
         if item.status != "aguardando_visto":
             raise HTTPException(409, "Este envelope já foi analisado.")
