@@ -19,6 +19,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from database import obter_banco
+from tempo import agora_local_naive
 from models import (
     AtividadeBanco,
     DepositoEnvelopeBanco,
@@ -119,7 +120,12 @@ def _atividade_dict(item: AtividadeBanco) -> dict:
     }
 
 
-def _envelope_dict(item: DepositoEnvelopeBanco, nomes: dict[int, str] | None = None) -> dict:
+def _envelope_dict(
+    item: DepositoEnvelopeBanco,
+    nomes: dict[int, str] | None = None,
+    *,
+    pode_aprovar: bool = False,
+) -> dict:
     nomes = nomes or {}
     return {
         "id": item.id,
@@ -139,6 +145,7 @@ def _envelope_dict(item: DepositoEnvelopeBanco, nomes: dict[int, str] | None = N
         "aprovado_por": nomes.get(item.aprovado_por_id) if item.aprovado_por_id else None,
         "comprovante_nome": item.comprovante_nome,
         "tem_comprovante": bool(item.comprovante_dados),
+        "pode_aprovar": pode_aprovar and item.status == "aguardando_visto",
     }
 
 
@@ -275,7 +282,7 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         if igreja is None:
             raise HTTPException(404, "Igreja não encontrada.")
 
-        agora = datetime.now()
+        agora = agora_local_naive()
         inicio_mes = datetime(agora.year, agora.month, 1)
         ano_proximo, mes_proximo = _mes_deslocado(agora.year, agora.month, 1)
         inicio_proximo = datetime(ano_proximo, mes_proximo, 1)
@@ -432,12 +439,19 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
                 Decimal("0.00"),
             )
 
+        pastor_responsavel = (
+            banco.get(UsuarioBanco, igreja.pastor_responsavel_id)
+            if igreja.pastor_responsavel_id
+            else None
+        )
+        nome_lider = pastor_responsavel.nome if pastor_responsavel else igreja.presidente
+
         return {
-            "versao_dashboard": "3.0",
+            "versao_dashboard": "3.1",
             "igreja": {
                 "id": igreja.id,
                 "nome": igreja.nome,
-                "presidente": igreja.presidente,
+                "presidente": nome_lider,
                 "igreja_sede_id": igreja.igreja_sede_id,
                 "tipo_unidade": "filial" if igreja.igreja_sede_id else "sede",
                 "rotulo_lider": "Pastor responsável" if igreja.igreja_sede_id else "Pastor presidente",
@@ -559,10 +573,43 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         if item is None:
             raise HTTPException(404, "Lembrete não encontrado.")
         item.ativo = dados.ativo
-        item.desativado_em = None if dados.ativo else datetime.now()
+        item.desativado_em = None if dados.ativo else agora_local_naive()
         banco.commit()
         banco.refresh(item)
         return _lembrete_dict(item)
+
+    def _saldo_caixa_fisico(banco: Session, igreja_id: int) -> Decimal:
+        mov_dinheiro = banco.scalars(
+            select(MovimentacaoFinanceiraBanco).where(
+                MovimentacaoFinanceiraBanco.igreja_id == igreja_id,
+                func.lower(MovimentacaoFinanceiraBanco.forma_pagamento) == "dinheiro",
+            )
+        ).all()
+        saldo_dinheiro = sum(
+            (
+                mov.valor if mov.tipo == "entrada" else -mov.valor
+                for mov in mov_dinheiro
+            ),
+            Decimal("0.00"),
+        )
+        envelopes_validos = banco.scalars(
+            select(DepositoEnvelopeBanco).where(
+                DepositoEnvelopeBanco.igreja_id == igreja_id,
+                DepositoEnvelopeBanco.status != "rejeitado",
+            )
+        ).all()
+        transferido = sum(
+            (item.valor for item in envelopes_validos),
+            Decimal("0.00"),
+        )
+        return saldo_dinheiro - transferido
+
+    def _pode_aprovar_envelope(usuario: UsuarioBanco, igreja: IgrejaBanco) -> bool:
+        return (
+            usuario.perfil == "pastor"
+            and igreja.pastor_responsavel_id is not None
+            and igreja.pastor_responsavel_id == usuario.id
+        )
 
     @router.post("/igrejas/{igreja_id}/financeiro/envelopes", status_code=status.HTTP_201_CREATED)
     async def criar_envelope(
@@ -590,6 +637,14 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         if not conteudo:
             raise HTTPException(422, "O comprovante é obrigatório.")
 
+        caixa_disponivel = _saldo_caixa_fisico(banco, igreja_id)
+        if valor > caixa_disponivel:
+            raise HTTPException(
+                409,
+                "O envelope ultrapassa o caixa físico disponível. "
+                f"Disponível: R$ {caixa_disponivel:.2f}.",
+            )
+
         atual = banco.scalar(
             select(func.max(DepositoEnvelopeBanco.numero)).where(
                 DepositoEnvelopeBanco.igreja_id == igreja_id
@@ -600,7 +655,12 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
             valor=valor,
             data_deposito=data_deposito,
             observacao=(observacao or "").strip() or None,
-            comprovante_nome=(comprovante.filename or "comprovante")[0:255],
+            comprovante_nome=(
+                "".join(
+                    c for c in (comprovante.filename or "comprovante")
+                    if c not in '\r\n"\\'
+                )[:255] or "comprovante"
+            ),
             comprovante_mime=comprovante.content_type,
             comprovante_dados=conteudo,
             igreja_id=igreja_id,
@@ -609,7 +669,11 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         banco.add(envelope)
         banco.commit()
         banco.refresh(envelope)
-        return _envelope_dict(envelope, {usuario.id: usuario.nome})
+        return _envelope_dict(
+            envelope,
+            {usuario.id: usuario.nome},
+            pode_aprovar=_pode_aprovar_envelope(usuario, igreja),
+        )
 
     @router.get("/igrejas/{igreja_id}/financeiro/envelopes")
     def listar_envelopes(
@@ -618,6 +682,10 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         usuario: UsuarioBanco = Depends(exigir_perfis("administrador", "pastor", "tesoureiro")),
     ):
         validar_igreja_do_usuario(usuario, igreja_id)
+        igreja = banco.get(IgrejaBanco, igreja_id)
+        if igreja is None:
+            raise HTTPException(404, "Igreja não encontrada.")
+
         itens = banco.scalars(
             select(DepositoEnvelopeBanco).where(
                 DepositoEnvelopeBanco.igreja_id == igreja_id
@@ -625,7 +693,11 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         ).all()
         ids = {i.criado_por_id for i in itens} | {i.aprovado_por_id for i in itens if i.aprovado_por_id}
         nomes = dict(banco.execute(select(UsuarioBanco.id, UsuarioBanco.nome).where(UsuarioBanco.id.in_(ids))).all()) if ids else {}
-        return [_envelope_dict(i, nomes) for i in itens]
+        pode_aprovar = _pode_aprovar_envelope(usuario, igreja)
+        return [
+            _envelope_dict(i, nomes, pode_aprovar=pode_aprovar)
+            for i in itens
+        ]
 
     @router.get("/igrejas/{igreja_id}/financeiro/envelopes/{envelope_id}/comprovante")
     def comprovante_envelope(
@@ -643,12 +715,17 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         )
         if item is None:
             raise HTTPException(404, "Envelope não encontrado.")
+        nome = "".join(
+            c for c in (item.comprovante_nome or "comprovante")
+            if c not in '\r\n"\\'
+        )[:255] or "comprovante"
         return Response(
             content=item.comprovante_dados,
             media_type=item.comprovante_mime,
             headers={
-                "Content-Disposition": f'inline; filename="{item.comprovante_nome}"',
+                "Content-Disposition": f'attachment; filename="{nome}"',
                 "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff",
             },
         )
 
@@ -698,10 +775,10 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         item.status = "aprovado"
         item.visto_observacao = dados.observacao
         item.aprovado_por_id = usuario.id
-        item.aprovado_em = datetime.now()
+        item.aprovado_em = agora_local_naive()
         banco.commit()
         banco.refresh(item)
-        return _envelope_dict(item, {usuario.id: usuario.nome})
+        return _envelope_dict(item, {usuario.id: usuario.nome}, pode_aprovar=False)
 
     @router.post("/igrejas/{igreja_id}/financeiro/envelopes/{envelope_id}/rejeitar")
     def rejeitar_envelope(
@@ -719,7 +796,7 @@ def registrar_recursos_v2(app, obter_usuario_atual, validar_igreja_do_usuario, e
         item.status = "rejeitado"
         item.visto_observacao = dados.observacao
         item.aprovado_por_id = usuario.id
-        item.aprovado_em = datetime.now()
+        item.aprovado_em = agora_local_naive()
         banco.commit()
         banco.refresh(item)
         return _envelope_dict(item, {usuario.id: usuario.nome})
