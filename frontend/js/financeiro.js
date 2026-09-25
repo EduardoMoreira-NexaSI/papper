@@ -519,16 +519,13 @@ function renderizarMovimentacoes(lista) {
 
             if (movimentacao.anexo_url) {
                 comprovante = `
-                    <a
-                        href="${escaparHTML(
-                            movimentacao.anexo_url
-                        )}"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        type="button"
                         class="comprovante-financeiro"
+                        data-anexo-url="${escaparHTML(movimentacao.anexo_url)}"
                     >
-                        Ver arquivo
-                    </a>
+                        Baixar arquivo
+                    </button>
                 `;
             }
 
@@ -618,7 +615,7 @@ function renderizarMovimentacoes(lista) {
 
 async function carregarMembros() {
     membros = await requisicaoAutenticada(
-        `/igrejas/${igrejaId}/membros`
+        `/igrejas/${igrejaId}/membros/resumo`
     );
 
     renderizarOpcoesMembros(membros);
@@ -647,7 +644,6 @@ function renderizarOpcoesMembros(lista) {
                     ${selecionado}
                 >
                     ${escaparHTML(membro.nome)}
-                    — ${escaparHTML(membro.cpf)}
                 </option>
             `;
         })
@@ -670,11 +666,8 @@ function pesquisarMembro() {
 
     const membrosFiltrados = membros.filter(
         function (membro) {
-            return (
-                normalizarTexto(membro.nome).includes(
-                    pesquisa
-                ) ||
-                String(membro.cpf).includes(pesquisa)
+            return normalizarTexto(membro.nome).includes(
+                pesquisa
             );
         }
     );
@@ -788,9 +781,9 @@ function atualizarRegrasCategoria() {
         categoria === "oferta" ||
         categoria === "doacao";
 
-    // Anexos genéricos de despesas ainda não têm persistência no backend.
-    // O comprovante obrigatório nesta versão é tratado pelo fluxo de envelope.
-    const permiteAnexo = false;
+    const permiteAnexo =
+        tipo === "saida" &&
+        categoria === "despesa";
 
     campoMembro.required = ehDizimo;
 
@@ -1055,18 +1048,6 @@ async function salvarMovimentacao(evento) {
             );
         }
 
-        /*
-            O backend ainda precisa receber a rota
-            responsável pelo upload. Dessa forma,
-            evitamos salvar um lançamento e perder
-            silenciosamente o arquivo escolhido.
-        */
-        if (anexoAtual) {
-            throw new Error(
-                "O anexo foi selecionado, mas o envio ainda precisa ser ativado na API."
-            );
-        }
-
         const dados = {
             tipo: campoTipo.value,
             categoria: campoCategoria.value,
@@ -1084,18 +1065,36 @@ async function salvarMovimentacao(evento) {
             )
         };
 
-        await requisicaoAutenticada(
-            `/igrejas/${igrejaId}/financeiro`,
-            {
-                method: "POST",
+        if (anexoAtual) {
+            const formulario = new FormData();
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(dados)
+            for (const [chave, valorDado] of Object.entries(dados)) {
+                if (valorDado !== null && valorDado !== undefined) {
+                    formulario.append(chave, String(valorDado));
+                }
             }
-        );
+
+            formulario.append("anexo", anexoAtual);
+
+            await requisicaoAutenticada(
+                `/igrejas/${igrejaId}/financeiro/com-anexo`,
+                {
+                    method: "POST",
+                    body: formulario
+                }
+            );
+        } else {
+            await requisicaoAutenticada(
+                `/igrejas/${igrejaId}/financeiro`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dados)
+                }
+            );
+        }
 
         fecharFormularioMovimentacao();
 
@@ -1120,6 +1119,34 @@ async function salvarMovimentacao(evento) {
             "Salvar movimentação";
     }
 }
+
+
+async function baixarComprovanteMovimentacao(caminho) {
+    try {
+        await baixarArquivoAutenticado(
+            caminho,
+            "papper-comprovante"
+        );
+    } catch (erro) {
+        mostrarMensagemPagina(
+            erro.message,
+            "erro"
+        );
+    }
+}
+
+
+corpoTabela.addEventListener("click", function (evento) {
+    const botao = evento.target.closest("[data-anexo-url]");
+
+    if (!botao) {
+        return;
+    }
+
+    baixarComprovanteMovimentacao(
+        botao.dataset.anexoUrl
+    );
+});
 
 
 /* =========================================================

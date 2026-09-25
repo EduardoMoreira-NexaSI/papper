@@ -235,7 +235,7 @@
         }
 
         const membros = await requisitar(
-            `/igrejas/${estado.igrejaId}/membros`
+            `/igrejas/${estado.igrejaId}/membros/resumo`
         );
 
         if (!Array.isArray(membros)) {

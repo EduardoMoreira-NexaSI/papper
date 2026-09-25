@@ -238,7 +238,7 @@ async function carregarUsuario() {
 
 async function carregarMembros() {
     membrosCadastrados = await requisicaoAutenticada(
-        `/igrejas/${igrejaId}/membros`
+        `/igrejas/${igrejaId}/membros/resumo`
     );
 
     preencherSeletoresMembros();

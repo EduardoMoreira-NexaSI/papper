@@ -8,7 +8,6 @@
   const mensagem = document.querySelector("#mensagem-envelope");
   const corpo = document.querySelector("#corpo-tabela-envelopes");
   let igrejaEnvelopeId = null;
-  let perfilEnvelope = null;
 
   if (!botaoAbrir || !container || !form || !corpo) return;
 
@@ -51,7 +50,7 @@
 
   function botoes(item) {
     const ver = `<button type="button" data-envelope-acao="comprovante" data-id="${item.id}">Comprovante</button>`;
-    if (!["master","pastor"].includes(perfilEnvelope) || item.status !== "aguardando_visto") return ver;
+    if (!item.pode_aprovar || item.status !== "aguardando_visto") return ver;
     return `${ver}<button class="aprovar" type="button" data-envelope-acao="aprovar" data-id="${item.id}">Dar visto</button><button class="rejeitar" type="button" data-envelope-acao="rejeitar" data-id="${item.id}">Rejeitar</button>`;
   }
 
@@ -103,14 +102,10 @@
   }
 
   async function abrirComprovante(id) {
-    const resposta = await fetch(`${API_URL}/igrejas/${igrejaEnvelopeId}/financeiro/envelopes/${id}/comprovante`, {
-      headers: {Authorization: `Bearer ${obterToken()}`}
-    });
-    if (!resposta.ok) throw new Error(`Não foi possível abrir o comprovante (${resposta.status}).`);
-    const blob = await resposta.blob();
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener");
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    await baixarArquivoAutenticado(
+      `/igrejas/${igrejaEnvelopeId}/financeiro/envelopes/${id}/comprovante`,
+      `envelope-${id}`
+    );
   }
 
   async function analisar(id, acao) {
@@ -141,7 +136,6 @@
     try {
       const usuario = await requisicaoAutenticada("/usuarios/eu");
       igrejaEnvelopeId = obterIgrejaDoUsuario(usuario);
-      perfilEnvelope = usuario.perfil;
       await Promise.all([carregarEnvelopes(), carregarResumo()]);
     } catch (erro) {
       corpo.innerHTML = `<tr><td colspan="6">${escapar(erro.message)}</td></tr>`;

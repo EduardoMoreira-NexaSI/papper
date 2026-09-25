@@ -284,7 +284,7 @@ async function carregarAtividade() {
 
 async function carregarMembros() {
     membros = await requisicaoAutenticada(
-        `/igrejas/${igrejaId}/membros`
+        `/igrejas/${igrejaId}/membros/resumo`
     );
 }
 

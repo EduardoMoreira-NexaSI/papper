@@ -133,6 +133,87 @@ function obterIgrejaDoUsuario(usuario) {
     return usuario.igreja_id;
 }
 
+async function baixarArquivoAutenticado(caminho, nomePadrao = "arquivo") {
+    const token = obterToken();
+
+    if (!token) {
+        window.location.href = "./login.html";
+        throw new Error("Usuário não autenticado.");
+    }
+
+    const resposta = await fetch(`${API_URL}${caminho}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    if (resposta.status === 401) {
+        sessionStorage.clear();
+        window.location.href = "./login.html";
+        throw new Error("Sua sessão expirou.");
+    }
+
+    if (!resposta.ok) {
+        let detalhe = null;
+        try {
+            detalhe = (await resposta.json())?.detail;
+        } catch {
+            // Erro sem JSON.
+        }
+        throw new Error(
+            typeof detalhe === "string"
+                ? detalhe
+                : `Não foi possível obter o arquivo (${resposta.status}).`
+        );
+    }
+
+    const blob = await resposta.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    const cabecalho = resposta.headers.get("Content-Disposition") || "";
+    const nomeCabecalho = cabecalho.match(/filename="([^"]+)"/i)?.[1];
+    link.download = nomeCabecalho || nomePadrao;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+
+function aplicarMenuPorPerfil() {
+    const perfil = sessionStorage.getItem("perfil");
+    const menu = document.querySelector(".menu-navegacao");
+
+    if (!perfil || !menu) {
+        return;
+    }
+
+    const permissoes = {
+        "dashboard.html": ["master", "administrador", "pastor", "secretaria", "tesoureiro", "lider", "membro"],
+        "membros.html": ["master", "administrador", "pastor", "secretaria"],
+        "atividades.html": ["master", "administrador", "pastor", "secretaria", "lider"],
+        "frequencia.html": ["master", "administrador", "pastor", "secretaria", "lider"],
+        "financeiro.html": ["master", "administrador", "pastor", "tesoureiro"],
+        "funcoes.html": ["master", "administrador", "pastor", "secretaria"],
+        "grupos.html": ["master", "administrador", "pastor", "secretaria", "lider"],
+        "filiais.html": ["master", "pastor"],
+        "relatorios.html": ["master", "administrador", "pastor", "secretaria", "tesoureiro"]
+    };
+
+    for (const link of menu.querySelectorAll("a[href]")) {
+        const href = link.getAttribute("href");
+        const permitidos = permissoes[href];
+
+        if (permitidos && !permitidos.includes(perfil)) {
+            link.remove();
+        }
+    }
+}
+
+
 function prepararLinkMaster() {
     if (sessionStorage.getItem("perfil") !== "master") {
         return;
@@ -178,4 +259,5 @@ function prepararLinkFiliais() {
 document.addEventListener("DOMContentLoaded", () => {
     prepararLinkFiliais();
     prepararLinkMaster();
+    aplicarMenuPorPerfil();
 });
