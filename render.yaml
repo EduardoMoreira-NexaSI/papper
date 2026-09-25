@@ -21,9 +21,7 @@ services:
         value: "admin@papperteste.com"
       - key: MASTER_PASSWORD
         sync: false
-      - key: SEED_TEST_USERS
-        value: "true"
-      - key: TEST_USER_PASSWORD
-        sync: false
-      - key: TEST_CHURCH_NAME
-        value: "Igreja de Teste Papper"
+      - key: APP_TIMEZONE
+        value: "America/Sao_Paulo"
+      - key: ENABLE_SETUP_ENDPOINT
+        value: "false"

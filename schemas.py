@@ -1,6 +1,6 @@
 from datetime import datetime, date
 
-from pydantic import BaseModel,EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 from typing import Literal
 from decimal import Decimal
@@ -168,6 +168,15 @@ class MembroResposta(BaseModel):
         "from_attributes": True
     }
 
+class MembroResumoResposta(BaseModel):
+    id: int
+    nome: str
+    status: bool
+    igreja_id: int
+
+    model_config = {"from_attributes": True}
+
+
 class AtividadeCriar(BaseModel):
     titulo: str
     tipo: str
@@ -266,7 +275,7 @@ class MovimentacaoCriar(BaseModel):
         "outro"
     ]
 
-    descricao: str | None = None
+    descricao: str | None = Field(default=None, max_length=250)
 
     valor: Decimal = Field(
         gt=0,
@@ -274,15 +283,40 @@ class MovimentacaoCriar(BaseModel):
         decimal_places=2
     )
 
-    forma_pagamento: str | None=None
+    forma_pagamento: str | None = Field(default=None, max_length=30)
     data_movimentacao: datetime
 
-    membro_id: int | None= None
+    membro_id: int | None = None
     atividade_id: int | None = None
+
+    @model_validator(mode="after")
+    def validar_regra_financeira(self):
+        categorias_entrada = {"dizimo", "oferta", "doacao", "outro"}
+        categorias_saida = {"despesa", "outro"}
+
+        if self.tipo == "entrada" and self.categoria not in categorias_entrada:
+            raise ValueError("Entradas aceitam dízimo, oferta, doação ou outro.")
+
+        if self.tipo == "saida" and self.categoria not in categorias_saida:
+            raise ValueError("Saídas aceitam apenas despesa ou outro.")
+
+        if self.categoria == "dizimo" and self.membro_id is None:
+            raise ValueError("Todo dízimo deve estar vinculado a um membro.")
+
+        if self.forma_pagamento is not None:
+            self.forma_pagamento = self.forma_pagamento.strip() or None
+
+        if self.descricao is not None:
+            self.descricao = self.descricao.strip() or None
+
+        return self
+
 
 class MovimentacaoResposta(MovimentacaoCriar):
     id: int
     igreja_id: int
+    anexo_url: str | None = None
+
     model_config = {"from_attributes": True}
 
 class ResumoFinanceiro(BaseModel): 

@@ -115,7 +115,6 @@ class IgrejaBanco(Base):
     pastor_responsavel_id: Mapped[int | None] = mapped_column(
         ForeignKey("usuarios.id"),
         nullable=True,
-        unique=True,
         index=True
     )
 
@@ -681,6 +680,27 @@ class MovimentacaoFinanceiraBanco(Base):
         nullable=True
     )
 
+    anexo_nome: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True
+    )
+
+    anexo_mime: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
+
+    anexo_dados: Mapped[bytes | None] = mapped_column(
+        LargeBinary,
+        nullable=True
+    )
+
+    @property
+    def anexo_url(self) -> str | None:
+        if not self.anexo_dados or self.id is None:
+            return None
+        return f"/igrejas/{self.igreja_id}/financeiro/{self.id}/anexo"
+
 
 # =========================================================
 # DEPÓSITOS EM ENVELOPE / TRANSFERÊNCIAS INTERNAS
@@ -812,6 +832,13 @@ class LembreteBanco(Base):
         server_default=true()
     )
 
+    token_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
+
     criado_em: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
@@ -831,6 +858,61 @@ class LembreteBanco(Base):
     usuario_id: Mapped[int] = mapped_column(
         ForeignKey("usuarios.id"),
         nullable=False
+    )
+
+
+# =========================================================
+# HISTÓRICO DE VÍNCULO DO MEMBRO COM UNIDADES
+# =========================================================
+
+class HistoricoVinculoMembroBanco(Base):
+    __tablename__ = "historico_vinculo_membros"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    membro_id: Mapped[int] = mapped_column(
+        ForeignKey("membros.id"),
+        nullable=False,
+        index=True
+    )
+
+    igreja_origem_id: Mapped[int | None] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=True,
+        index=True
+    )
+
+    igreja_destino_id: Mapped[int] = mapped_column(
+        ForeignKey("igrejas.id"),
+        nullable=False,
+        index=True
+    )
+
+    usuario_executor_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=True
+    )
+
+    motivo: Mapped[str] = mapped_column(
+        String(80),
+        nullable=False,
+        default="transferencia",
+        server_default="transferencia"
+    )
+
+    observacao: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True
+    )
+
+    transferido_em: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=func.now()
     )
 
 
