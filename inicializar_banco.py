@@ -17,8 +17,9 @@ def main() -> None:
 
     print(
         "Banco pronto. "
-        f"Igreja de teste: {resultado['igreja_id']} | "
-        f"Usuários: {resultado['usuarios']}"
+        f"Master: {resultado['master_id']} | "
+        f"Criado agora: {resultado['master_criado']} | "
+        f"Usuários preservados: {resultado['usuarios']}"
     )
 
 

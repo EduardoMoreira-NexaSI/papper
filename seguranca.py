@@ -42,6 +42,7 @@ def criar_token_acesso(
     usuario_id: int,
     igreja_id: int | None,
     perfil: str,
+    token_version: int = 0,
 ) -> str:
     expiracao = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
@@ -51,6 +52,7 @@ def criar_token_acesso(
         "sub": str(usuario_id),
         "igreja_id": igreja_id,
         "perfil": perfil,
+        "ver": int(token_version),
         "exp": expiracao,
     }
 

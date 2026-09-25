@@ -1,14 +1,18 @@
 import os
+from collections import defaultdict
 from pathlib import Path
+from threading import Lock
+from time import monotonic
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 
-from fastapi import Depends, FastAPI, HTTPException, status, Header
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, Response, UploadFile, status
 from sqlalchemy.orm import Session
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, text
 from datetime import datetime, date, time
 from decimal import Decimal
 from typing import Literal
+from pydantic import ValidationError
 from database import obter_banco
 from relatorios_backend import registrar_relatorios
 from admin_backend import registrar_admin
@@ -56,6 +60,7 @@ from schemas import (
     IgrejaResposta,
     MembroCriar,
     MembroResposta,
+    MembroResumoResposta,
     PresencaCriar,
     PresencaDetalhada,
     PresencaResposta,
@@ -79,11 +84,65 @@ from schemas import (
 
 
 SETUP_TOKEN = os.getenv("SETUP_TOKEN")
+ENABLE_SETUP_ENDPOINT = os.getenv("ENABLE_SETUP_ENDPOINT", "false").strip().lower() in {
+  "1", "true", "sim", "yes", "on"
+}
+
+LOGIN_JANELA_SEGUNDOS = 10 * 60
+LOGIN_BLOQUEIO_SEGUNDOS = 15 * 60
+LOGIN_MAX_FALHAS = 5
+_login_lock = Lock()
+_login_falhas: dict[str, list[float]] = defaultdict(list)
+_login_bloqueados_ate: dict[str, float] = {}
+
+
+def _chave_login(request: Request, credencial: str) -> str:
+  cliente = request.client.host if request.client else "desconhecido"
+  return f"{cliente}|{credencial.strip().lower()}"
+
+
+def _verificar_limite_login(chave: str) -> None:
+  agora = monotonic()
+  with _login_lock:
+    bloqueado_ate = _login_bloqueados_ate.get(chave, 0)
+    if bloqueado_ate > agora:
+      espera = max(1, int(bloqueado_ate - agora))
+      raise HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail=f"Muitas tentativas de login. Tente novamente em {espera} segundos.",
+      )
+    if bloqueado_ate:
+      _login_bloqueados_ate.pop(chave, None)
+
+    limite = agora - LOGIN_JANELA_SEGUNDOS
+    _login_falhas[chave] = [t for t in _login_falhas.get(chave, []) if t >= limite]
+
+
+def _registrar_falha_login(chave: str) -> None:
+  agora = monotonic()
+  with _login_lock:
+    falhas = _login_falhas.setdefault(chave, [])
+    falhas.append(agora)
+    if len(falhas) >= LOGIN_MAX_FALHAS:
+      _login_bloqueados_ate[chave] = agora + LOGIN_BLOQUEIO_SEGUNDOS
+      _login_falhas.pop(chave, None)
+
+
+def _limpar_falhas_login(chave: str) -> None:
+  with _login_lock:
+    _login_falhas.pop(chave, None)
+    _login_bloqueados_ate.pop(chave, None)
 
 
 def exigir_token_setup(
     x_setup_token: str | None = Header(default=None)
 ):
+  if not ENABLE_SETUP_ENDPOINT:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail="Endpoint de configuração desabilitado."
+    )
+
   if not SETUP_TOKEN:
     raise HTTPException(
       status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -134,6 +193,11 @@ async def desabilitar_cache_frontend(request, call_next):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 
+  response.headers["X-Content-Type-Options"] = "nosniff"
+  response.headers["X-Frame-Options"] = "DENY"
+  response.headers["Referrer-Policy"] = "same-origin"
+  response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+
   return response
 
 
@@ -176,6 +240,18 @@ def obter_usuario_atual(
       detail="Usuário desativado"
     )
 
+  versao_token = int(dados_token.get("ver", 0))
+  if versao_token != int(usuario.token_version or 0):
+    raise erro_credencial
+
+  if usuario.perfil != "master" and usuario.igreja_id is not None:
+    igreja_usuario = banco.get(IgrejaBanco, usuario.igreja_id)
+    if igreja_usuario is None or not igreja_usuario.ativo:
+      raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="A unidade deste usuário está desativada."
+      )
+
   return usuario
 def exigir_perfis(*perfis_permitidos):
   def verificar_perfil(
@@ -203,8 +279,16 @@ def inicia():
   return RedirectResponse(url="/login.html")
 
 @app.get("/health")
-def verifica_saude():
-  return {"status": "online", "version": "3.0.1-hotfix-desktop"}
+def verifica_saude(
+  banco: Session = Depends(obter_banco)
+):
+  banco.execute(text("SELECT 1"))
+  return {
+    "status": "online",
+    "version": "3.1.0-maintenance",
+    "database": banco.bind.dialect.name if banco.bind is not None else "desconhecido",
+    "timezone": os.getenv("APP_TIMEZONE", "America/Sao_Paulo"),
+  }
 
 @app.post(
     "/igrejas",
@@ -300,7 +384,9 @@ def cadastrar_membro(
 def listar_membros(
   igreja_id: int,
   banco: Session = Depends(obter_banco),
-  usuario: UsuarioBanco = Depends(obter_usuario_atual)
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria")
+  )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
 
@@ -321,6 +407,32 @@ def listar_membros(
   membros = banco.scalars(comando).all()
 
   return membros
+
+@app.get(
+    "/igrejas/{igreja_id}/membros/resumo",
+    response_model=list[MembroResumoResposta]
+)
+def listar_membros_resumo(
+  igreja_id: int,
+  banco: Session = Depends(obter_banco),
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria", "tesoureiro", "lider")
+  )
+):
+  validar_igreja_do_usuario(usuario, igreja_id)
+
+  if banco.get(IgrejaBanco, igreja_id) is None:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail="Igreja não encontrada."
+    )
+
+  return banco.scalars(
+    select(MembroBanco)
+    .where(MembroBanco.igreja_id == igreja_id)
+    .order_by(MembroBanco.nome, MembroBanco.id)
+  ).all()
+
 
 @app.get(
     "/igrejas/{igreja_id}/membros/{membro_id}",
@@ -680,7 +792,9 @@ def listar_presencas(
   igreja_id: int,
   atividade_id: int,
   banco: Session = Depends(obter_banco),
-  usuario: UsuarioBanco = Depends(obter_usuario_atual)
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria", "lider")
+  )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
 
@@ -794,7 +908,9 @@ def resumo_presencas(
   igreja_id: int,
   atividade_id: int,
   banco: Session = Depends(obter_banco),
-  usuario: UsuarioBanco = Depends(obter_usuario_atual)
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria", "lider")
+  )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
   comando_atividade = (
@@ -837,7 +953,9 @@ def consultar_frequencia_membro(
   igreja_id: int,
   membro_id: int,
   banco: Session= Depends(obter_banco),
-  usuario: UsuarioBanco = Depends(obter_usuario_atual)
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria", "lider")
+  )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
 
@@ -893,7 +1011,9 @@ def resumir_frequencia_membro(
   igreja_id: int,
   membro_id: int,
   banco: Session = Depends(obter_banco),
-  usuario: UsuarioBanco = Depends(obter_usuario_atual)
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "secretaria", "lider")
+  )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
 
@@ -956,6 +1076,76 @@ def resumir_frequencia_membro(
       "percentual_comparecimento": percentual
   }
 
+def _validar_vinculos_financeiros(
+  banco: Session,
+  igreja_id: int,
+  dados: MovimentacaoCriar,
+):
+  if dados.membro_id is not None:
+    membro = banco.scalar(
+      select(MembroBanco).where(
+        MembroBanco.id == dados.membro_id,
+        MembroBanco.igreja_id == igreja_id
+      )
+    )
+    if membro is None:
+      raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Membro não encontrado nesta igreja."
+      )
+
+  if dados.atividade_id is not None:
+    atividade = banco.scalar(
+      select(AtividadeBanco).where(
+        AtividadeBanco.id == dados.atividade_id,
+        AtividadeBanco.igreja_id == igreja_id
+      )
+    )
+    if atividade is None:
+      raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Atividade não encontrada nesta igreja."
+      )
+
+
+def _persistir_movimentacao(
+  banco: Session,
+  igreja_id: int,
+  dados: MovimentacaoCriar,
+  *,
+  anexo_nome: str | None = None,
+  anexo_mime: str | None = None,
+  anexo_dados: bytes | None = None,
+):
+  igreja = banco.get(IgrejaBanco, igreja_id)
+  if igreja is None:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail="Igreja não encontrada"
+    )
+
+  _validar_vinculos_financeiros(banco, igreja_id, dados)
+
+  nova = MovimentacaoFinanceiraBanco(
+    tipo=dados.tipo,
+    categoria=dados.categoria,
+    descricao=dados.descricao,
+    valor=dados.valor,
+    forma_pagamento=dados.forma_pagamento,
+    data_movimentacao=dados.data_movimentacao,
+    igreja_id=igreja_id,
+    membro_id=dados.membro_id,
+    atividade_id=dados.atividade_id,
+    anexo_nome=anexo_nome,
+    anexo_mime=anexo_mime,
+    anexo_dados=anexo_dados,
+  )
+  banco.add(nova)
+  banco.commit()
+  banco.refresh(nova)
+  return nova
+
+
 @app.post(
   "/igrejas/{igreja_id}/financeiro",
   response_model=MovimentacaoResposta,
@@ -970,66 +1160,122 @@ def cadastrar_movimentacao(
   )
 ):
   validar_igreja_do_usuario(usuario, igreja_id)
+  return _persistir_movimentacao(banco, igreja_id, dados)
 
-  igreja = banco.get(IgrejaBanco, igreja_id)
 
-  if igreja is None:
+@app.post(
+  "/igrejas/{igreja_id}/financeiro/com-anexo",
+  response_model=MovimentacaoResposta,
+  status_code=status.HTTP_201_CREATED
+)
+async def cadastrar_movimentacao_com_anexo(
+  igreja_id: int,
+  tipo: str = Form(...),
+  categoria: str = Form(...),
+  valor: Decimal = Form(...),
+  data_movimentacao: datetime = Form(...),
+  descricao: str | None = Form(default=None),
+  forma_pagamento: str | None = Form(default=None),
+  membro_id: int | None = Form(default=None),
+  atividade_id: int | None = Form(default=None),
+  anexo: UploadFile = File(...),
+  banco: Session = Depends(obter_banco),
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "tesoureiro")
+  )
+):
+  validar_igreja_do_usuario(usuario, igreja_id)
+
+  try:
+    dados = MovimentacaoCriar(
+      tipo=tipo,
+      categoria=categoria,
+      descricao=descricao,
+      valor=valor,
+      forma_pagamento=forma_pagamento,
+      data_movimentacao=data_movimentacao,
+      membro_id=membro_id,
+      atividade_id=atividade_id,
+    )
+  except ValidationError as exc:
     raise HTTPException(
-      status_code=status.HTTP_404_NOT_FOUND,
-      detail="Igreja não encontrada"
+      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+      detail=exc.errors(),
+    ) from exc
+
+  tipos_permitidos = {"application/pdf", "image/png", "image/jpeg"}
+  if anexo.content_type not in tipos_permitidos:
+    raise HTTPException(
+      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+      detail="O anexo deve ser PDF, PNG ou JPG/JPEG."
     )
 
-  if dados.membro_id is not None:
-    comando_membro = (
-      select(MembroBanco)
-      .where(
-        MembroBanco.id== dados.membro_id,
-        MembroBanco.igreja_id==igreja_id
-      )
+  conteudo = await anexo.read(5 * 1024 * 1024 + 1)
+  if not conteudo:
+    raise HTTPException(
+      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+      detail="O anexo está vazio."
+    )
+  if len(conteudo) > 5 * 1024 * 1024:
+    raise HTTPException(
+      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+      detail="O anexo deve possuir no máximo 5 MB."
     )
 
-    membro = banco.scalar(comando_membro)
+  nome = "".join(
+    c for c in (anexo.filename or "comprovante")
+    if c not in '\r\n"\\'
+  )[:255] or "comprovante"
 
-    if membro is None:
-      raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Membro não encontrado nesta igreja."
-      )
-
-  if dados.atividade_id is not None:
-    comando_atividade = (
-      select(AtividadeBanco)
-      .where(
-        AtividadeBanco.id == dados.atividade_id,
-        AtividadeBanco.igreja_id == igreja_id
-      )
-    )
-
-    atividade = banco.scalar(comando_atividade)
-
-    if atividade is None:
-      raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Atividade não encontrada nesta igreja."
-      )
-
-  nova_movimentacao = MovimentacaoFinanceiraBanco(
-    tipo=dados.tipo,
-    categoria=dados.categoria,
-    descricao=dados.descricao,
-    valor=dados.valor,
-    forma_pagamento=dados.forma_pagamento,
-    data_movimentacao=dados.data_movimentacao,
-    igreja_id= igreja_id,
-    membro_id=dados.membro_id,
-    atividade_id=dados.atividade_id
+  return _persistir_movimentacao(
+    banco,
+    igreja_id,
+    dados,
+    anexo_nome=nome,
+    anexo_mime=anexo.content_type,
+    anexo_dados=conteudo,
   )
 
-  banco.add(nova_movimentacao)
-  banco.commit()
-  banco.refresh(nova_movimentacao)
 
-  return nova_movimentacao
+@app.get(
+  "/igrejas/{igreja_id}/financeiro/anexos/{movimentacao_id}"
+)
+def obter_anexo_movimentacao(
+  igreja_id: int,
+  movimentacao_id: int,
+  banco: Session = Depends(obter_banco),
+  usuario: UsuarioBanco = Depends(
+    exigir_perfis("administrador", "pastor", "tesoureiro")
+  )
+):
+  validar_igreja_do_usuario(usuario, igreja_id)
+  item = banco.scalar(
+    select(MovimentacaoFinanceiraBanco).where(
+      MovimentacaoFinanceiraBanco.id == movimentacao_id,
+      MovimentacaoFinanceiraBanco.igreja_id == igreja_id,
+    )
+  )
+  if item is None or not item.anexo_dados:
+    raise HTTPException(
+      status_code=status.HTTP_404_NOT_FOUND,
+      detail="Comprovante não encontrado."
+    )
+
+  nome = "".join(
+    c for c in (item.anexo_nome or "comprovante")
+    if c not in '\r\n"\\'
+  )[:255] or "comprovante"
+
+  return Response(
+    content=item.anexo_dados,
+    media_type=item.anexo_mime or "application/octet-stream",
+    headers={
+      "Content-Disposition": f'attachment; filename="{nome}"',
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  )
+
 
 @app.get(
   "/igrejas/{igreja_id}/financeiro",
@@ -2248,10 +2494,13 @@ def cadastrar_primeiro_administrador(
   response_model=TokenResposta
 )
 def realizar_login(
+  request: Request,
   formulario: OAuth2PasswordRequestForm = Depends(),
   banco: Session = Depends(obter_banco)
 ):
   credencial = formulario.username.strip().lower()
+  chave_login = _chave_login(request, credencial)
+  _verificar_limite_login(chave_login)
 
   comando = select(UsuarioBanco).where(
     or_(
@@ -2263,6 +2512,7 @@ def realizar_login(
   usuario = banco.scalar(comando)
 
   if usuario is None:
+    _registrar_falha_login(chave_login)
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED,
       detail="Usuário/e-mail ou senha inválidos.",
@@ -2273,6 +2523,7 @@ def realizar_login(
     formulario.password,
     usuario.senha_hash
   ):
+    _registrar_falha_login(chave_login)
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED,
       detail="Usuário/e-mail ou senha inválidos.",
@@ -2285,10 +2536,13 @@ def realizar_login(
       detail="Usuário desativado"
     )
 
+  _limpar_falhas_login(chave_login)
+
   token = criar_token_acesso(
     usuario_id=usuario.id,
     igreja_id=usuario.igreja_id,
-    perfil=usuario.perfil
+    perfil=usuario.perfil,
+    token_version=usuario.token_version,
   )
 
   return {

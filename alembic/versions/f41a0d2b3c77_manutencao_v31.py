@@ -18,6 +18,11 @@ USUARIOS_TESTE = tuple(f"user{i:02d}" for i in range(1, 11))
 
 
 def upgrade() -> None:
+    with op.batch_alter_table("igrejas") as batch_op:
+        batch_op.add_column(
+            sa.Column("ativo", sa.Boolean(), server_default=sa.true(), nullable=False)
+        )
+
     with op.batch_alter_table("movimentacoes_financeiras") as batch_op:
         batch_op.add_column(sa.Column("anexo_nome", sa.String(length=255), nullable=True))
         batch_op.add_column(sa.Column("anexo_mime", sa.String(length=100), nullable=True))
@@ -132,3 +137,6 @@ def downgrade() -> None:
         batch_op.drop_column("anexo_dados")
         batch_op.drop_column("anexo_mime")
         batch_op.drop_column("anexo_nome")
+
+    with op.batch_alter_table("igrejas") as batch_op:
+        batch_op.drop_column("ativo")

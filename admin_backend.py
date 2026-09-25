@@ -180,7 +180,9 @@ def registrar_admin(app, obter_usuario_atual):
         if alvo.id == master.id and not dados.ativo:
             raise HTTPException(400, "O usuário master não pode desativar a própria conta.")
 
-        alvo.ativo = dados.ativo
+        if alvo.ativo != dados.ativo:
+            alvo.ativo = dados.ativo
+            alvo.token_version += 1
         banco.commit()
         banco.refresh(alvo)
         return alvo
@@ -199,6 +201,7 @@ def registrar_admin(app, obter_usuario_atual):
         if alvo is None:
             raise HTTPException(404, "Usuário não encontrado.")
         alvo.senha_hash = criar_hash_senha(dados.nova_senha)
+        alvo.token_version += 1
         banco.commit()
         return None
 

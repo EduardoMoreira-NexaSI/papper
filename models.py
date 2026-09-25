@@ -96,6 +96,13 @@ class IgrejaBanco(Base):
         nullable=False
     )
 
+    ativo: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=true()
+    )
+
     logo_dados: Mapped[bytes | None] = mapped_column(
         LargeBinary,
         nullable=True
@@ -699,7 +706,7 @@ class MovimentacaoFinanceiraBanco(Base):
     def anexo_url(self) -> str | None:
         if not self.anexo_dados or self.id is None:
             return None
-        return f"/igrejas/{self.igreja_id}/financeiro/{self.id}/anexo"
+        return f"/igrejas/{self.igreja_id}/financeiro/anexos/{self.id}"
 
 
 # =========================================================
